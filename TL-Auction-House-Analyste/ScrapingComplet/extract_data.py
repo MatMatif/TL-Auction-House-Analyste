@@ -2,6 +2,10 @@ import time
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.by import By
+
 import re  # Importation du module pour utiliser les expressions régulières
 
 try:
@@ -61,6 +65,7 @@ try:
     """)
 
     # Utiliser une expression régulière pour extraire le nombre total d'entrées après 'of'
+    total_entries = 0
     if pagination_text:
         try:
             # Rechercher le nombre après 'of'
@@ -77,6 +82,7 @@ try:
     else:
         print("Impossible de récupérer le texte de pagination.")
         total_entries = 0
+
     print(f"Nombre total d'entrées : {total_entries}")
     
     # Étape 5 : Cliquer sur tous les éléments du tableau
@@ -96,8 +102,10 @@ try:
                 console.error("Ligne {index} introuvable.");
             }}
         """)
-        time.sleep(1)  # Attendre 1 seconde
-
+        #time.sleep(1)  # Attendre 1 seconde
+        WebDriverWait(driver, 10).until(
+            EC.element_to_be_clickable((By.CSS_SELECTOR, '.btn.btn-secondary.fw-semi-bold.d-flex.align-items-center.gap-1.svelte-o8inv0'))
+        )
         # Étape 5.2 : Cliquer sur le bouton "Go Back"
         driver.execute_script("""
             const goBackButton = document.querySelector('.btn.btn-secondary.fw-semi-bold.d-flex.align-items-center.gap-1.svelte-o8inv0');

@@ -1,67 +1,90 @@
 import time
+from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-import re
+from selenium.webdriver.common.by import By
+import pandas as pd
+import re  # Importation du module pour utiliser les expressions régulières
+
+extracted_data = []  # Liste pour stocker les données extraites
 
 try:
-    # Configuration de Selenium avec le navigateur Brave en mode headless
-    driver_path = r'E:\ProgramationPerso\Drivers\chromedriver-win64\chromedriver.exe'
-    brave_path = r"C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe"
+    # Configuration de Selenium avec le navigateur Brave
+    driver_path = r'E:\ProgramationPerso\Drivers\chromedriver-win64\chromedriver.exe'  # Chemin vers le driver Chrome
+    brave_path = r"C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe"  # Chemin vers Brave
 
     options = Options()
-    options.binary_location = brave_path
-    options.add_argument('--headless')  # Activer le mode headless
-    options.add_argument('--disable-gpu')  # Désactiver l'accélération GPU (recommandé en mode headless)
-    options.add_argument('--no-sandbox')  # Pour éviter certaines erreurs de sandboxing en mode headless
-    options.add_argument('--disable-software-rasterizer')  # Optimisation en mode headless
+    options.binary_location = brave_path  # Utilisation du navigateur Brave au lieu de Chrome
 
+    # Ajout d'options pour le mode headless (sans interface graphique)
+    options.add_argument('--headless')
+    options.add_argument('--no-sandbox')
+    options.add_argument('--disable-dev-shm-usage')
+    options.add_argument('--disable-gpu')
+    options.add_argument('window-size=1920x1080')
+    options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36")
+
+    # Initialisation du navigateur Brave avec Selenium
     service = Service(driver_path)
-
-    # Initialiser le navigateur avec les options et driver
     driver = webdriver.Chrome(service=service, options=options)
+
+    # Désactivation de la détection de Selenium par les sites web (pour éviter d'être détecté)
+    driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
+
+    # Désactivation des animations pour accélérer le processus
+    driver.execute_script(""" 
+        const style = document.createElement('style');
+        style.innerHTML = '*, *::before, *::after { transition: none !important; animation: none !important; }';
+        document.head.appendChild(style);
+    """)
 
     # Étape 1 : Accéder à la page
     driver.get("https://tldb.info/auction-house")
 
-    # Utiliser WebDriverWait pour attendre que la page se charge (jusqu'à 10 secondes)
+    # Attendre la présence de la pagination pour confirmer que la page est bien chargée
     WebDriverWait(driver, 10).until(
         EC.presence_of_element_located((By.CSS_SELECTOR, 'aside.dt-pagination-rowcount'))
     )
 
     # Étape 2 : Ouvrir le premier menu dropdown et cliquer sur "All"
-    driver.execute_script("""
+    driver.execute_script(""" 
         const dropdownButtons = document.querySelectorAll('.btn.btn-secondary.w-100.fw-semi-bold.dropdown-toggle');
         if (dropdownButtons.length > 0) {
             dropdownButtons[0].click(); // Clic sur le premier bouton dropdown
-            setTimeout(() => {
-                const dropdownMenu = document.querySelector("div[start='true'].dropdown-menu.show");
-                const allButton = Array.from(dropdownMenu.querySelectorAll("button"))
-                    .find(button => button.textContent.trim() === "All");
-                if (allButton) allButton.click(); // Clic sur le bouton "All"
-            }, 500); // Délai pour permettre au menu de s'afficher
         }
+    """)
+    WebDriverWait(driver, 5).until(
+        EC.presence_of_element_located((By.CSS_SELECTOR, "div[start='true'].dropdown-menu.show"))
+    )
+    driver.execute_script(""" 
+        const dropdownMenu = document.querySelector("div[start='true'].dropdown-menu.show");
+        const allButton = Array.from(dropdownMenu.querySelectorAll("button"))
+            .find(button => button.textContent.trim() === "All");
+        if (allButton) allButton.click(); // Clic sur le bouton "All"
     """)
 
     # Étape 3 : Ouvrir le deuxième menu dropdown et cliquer sur le deuxième "Europe"
-    driver.execute_script("""
+    driver.execute_script(""" 
         const dropdownButtons = document.querySelectorAll('.btn.btn-secondary.w-100.fw-semi-bold.dropdown-toggle');
         if (dropdownButtons.length > 1) {
             dropdownButtons[1].click(); // Clic sur le deuxième bouton dropdown
-            setTimeout(() => {
-                const dropdownMenu = document.querySelector("div[start='true'].dropdown-menu.show");
-                const europeButtons = Array.from(dropdownMenu.querySelectorAll("button"))
-                    .filter(button => button.textContent.trim() === "Europe");
-                if (europeButtons.length >= 2) europeButtons[1].click(); // Clic sur le deuxième bouton "Europe"
-            }, 500); // Délai pour permettre au menu de s'afficher
         }
+    """)
+    WebDriverWait(driver, 5).until(
+        EC.presence_of_element_located((By.CSS_SELECTOR, "div[start='true'].dropdown-menu.show"))
+    )
+    driver.execute_script(""" 
+        const dropdownMenu = document.querySelector("div[start='true'].dropdown-menu.show");
+        const europeButtons = Array.from(dropdownMenu.querySelectorAll("button"))
+            .filter(button => button.textContent.trim() === "Europe");
+        if (europeButtons.length >= 2) europeButtons[1].click(); // Clic sur le deuxième bouton "Europe"
     """)
 
     # Étape 4 : Récupérer le nombre total d'entrées à partir de la pagination
-    pagination_text = driver.execute_script("""
+    pagination_text = driver.execute_script(""" 
         const paginationElement = document.querySelector('aside.dt-pagination-rowcount');
         if (paginationElement) {
             return paginationElement.textContent.trim();
@@ -70,11 +93,10 @@ try:
         }
     """)
 
-    # Utiliser une expression régulière pour extraire le nombre total d'entrées après 'of'
+    # Utiliser une expression régulière pour extraire le nombre total d'entrées
     total_entries = 0
     if pagination_text:
         try:
-            # Rechercher le nombre après 'of'
             match = re.search(r'of (\d+) entries', pagination_text)
             if match:
                 total_entries = int(match.group(1))  # Extraire le nombre après 'of'
@@ -85,42 +107,98 @@ try:
             print(f"Erreur lors de l'extraction du nombre d'entrées : {e}")
     else:
         print("Impossible de récupérer le texte de pagination.")
-    
-    # Étape 5 : Cliquer sur tous les éléments du tableau
-    for index in range(total_entries):  # Itération basée sur le nombre total d'entrées
-        # Étape 5.1 : Trouver et cliquer sur le nom de l'objet dans la ligne du tableau
+
+    # Étape 5 : Itérer sur les éléments du tableau et extraire les données
+    for index in range(min(total_entries, 10)):  # Limité à 10 éléments pour l'exemple
+        # Sélectionner une ligne du tableau et cliquer sur l'élément pour charger les informations
         driver.execute_script(f"""
             const tableRows = document.querySelectorAll('tbody.align-middle > tr');
             if (tableRows.length > {index}) {{
                 const row = tableRows[{index}];
                 const itemName = row.querySelector('.item-name .text-truncate span');
                 if (itemName) {{
-                    itemName.click(); // Clic sur le nom de l'objet dans la ligne du tableau
-                }} else {{
-                    console.error("Nom de l'objet introuvable dans la ligne {index}.");
+                    itemName.click(); // Clic sur l'élément
                 }}
-            }} else {{
-                console.error("Ligne {index} introuvable.");
             }}
         """)
 
-        # Étape 5.2 : Attendre que le bouton "Go Back" soit cliquable avant d'interagir
+        # Attendre que la page des détails soit chargée
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, 'tbody.align-middle'))
+        )
+
+        # Récupérer le contenu HTML du tableau après chargement
+        table_html = driver.execute_script(""" 
+            const table = document.querySelector('tbody.align-middle');
+            return table ? table.outerHTML : null;
+        """)
+
+        if table_html:
+            # Sauvegarder le contenu HTML brut dans un fichier pour l'inspecter
+            with open(f"table_raw_{index}.html", "w", encoding="utf-8") as raw_file:
+                raw_file.write(table_html)
+
+            # Nettoyer et extraire les données à l'aide de BeautifulSoup
+            soup = BeautifulSoup(table_html, "html.parser")
+            rows = soup.find_all("tr", class_="ah-table-row")  # Filtrer uniquement les lignes avec cette classe
+
+            # Supprimer les balises inutiles et les attributs pour un meilleur nettoyage
+            tbody = soup.find_all("tbody", class_="align-middle")[0]
+            for tag in tbody.find_all(["span", "div", "svg", "img", "a", "path"]):
+                if not tag.get_text(strip=True):
+                    tag.decompose()  # Supprime la balise du DOM si elle est vide
+
+            # Supprimer les attributs inutiles dans les balises restantes
+            for tag in tbody.find_all(True):
+                del tag['class']
+                del tag['style']
+
+            # Sauvegarder le tableau nettoyé dans un nouveau fichier HTML
+            with open(f"table_cleaned_{index}.html", "w", encoding="utf-8") as cleaned_file:
+                cleaned_file.write(str(tbody))
+
+            # EXTRAIRE LES DONNÉES DU FICHIER NETTOYÉ ET LES ENREGISTRER DANS UN FICHIER EXCEL
+            with open(f"table_cleaned_{index}.html", "r", encoding="utf-8") as f:
+                soup = BeautifulSoup(f, "html.parser")
+
+            tbody = soup.find_all("tbody", class_="align-middle")[0]
+
+            # Extraction des données du tableau
+            table_data = []
+            for row in tbody.find_all("tr"):
+                try:
+                    name = row.find_all("td")[2].get_text(strip=True)
+                    trait = row.find_all("td")[3].get_text(strip=True)
+                    price = row.find_all("td")[5].get_text(strip=True)
+
+                    table_data.append({
+                        "Name": name,
+                        "Trait": trait,
+                        "Price": price
+                    })
+                except IndexError:
+                    continue  # Si une ligne est malformée, on l'ignore
+
+            # Créer un DataFrame et le sauvegarder dans un fichier Excel
+            df = pd.DataFrame(table_data)
+            excel_file = f"table_data_{index}.xlsx"
+            df.to_excel(excel_file, index=False, engine="openpyxl")
+
+            print(f"Les données ont été extraites et sauvegardées dans '{excel_file}'")
+
+        # Retourner à la liste principale
         WebDriverWait(driver, 10).until(
             EC.element_to_be_clickable((By.CSS_SELECTOR, '.btn.btn-secondary.fw-semi-bold.d-flex.align-items-center.gap-1.svelte-o8inv0'))
         )
-
-        driver.execute_script("""
+        driver.execute_script(""" 
             const goBackButton = document.querySelector('.btn.btn-secondary.fw-semi-bold.d-flex.align-items-center.gap-1.svelte-o8inv0');
-            if (goBackButton) {
-                goBackButton.click(); // Clic sur le bouton "Go Back"
-            } else {
-                console.error("Bouton 'Go Back' introuvable.");
-            }
+            if (goBackButton) goBackButton.click();
         """)
 
-    print("Tout le contenu du tableau a bien été extrait.")
+    print("Extraction terminée.")
+    print(extracted_data)  # Afficher les données extraites
 
 except Exception as e:
     print(f"Une erreur s'est produite : {e}")
 finally:
-    driver.quit()
+    driver.quit()  # Fermer le navigateur
