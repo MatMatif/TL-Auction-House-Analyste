@@ -18,6 +18,7 @@ Vous pouvez installer les bibliothèques Python requises avec la commande suivan
 
 ```bash
 pip install selenium beautifulsoup4 pandas
+```
 
 ## Structure du projet
 
