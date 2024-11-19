@@ -10,9 +10,10 @@ import re
 import csv
 from bs4 import BeautifulSoup
 from prettytable import PrettyTable
+from datetime import datetime
 
-# Fonction pour afficher les données extraites dans un joli tableau
-def print_pretty_data(data):
+
+def print_pretty_data(data): # Fonction pour afficher les données extraites dans un joli tableau
     table = PrettyTable()
     table.field_names = ["Name", "Trait", "Price"]  # Définir les noms des colonnes
 
@@ -23,8 +24,7 @@ def print_pretty_data(data):
 
     print(table)  # Afficher le tableau
 
-# Fonction pour nettoyer et convertir le prix en entier
-def clean_and_convert_price(price_str):
+def clean_and_convert_price(price_str): # Fonction pour nettoyer et convertir le prix en entier
     # Supprimer les espaces et symboles inutiles (comme $ ou €), puis convertir en int
     cleaned_price = price_str.replace(",", "").replace("€", "").replace("$", "").strip()
     try:
@@ -32,8 +32,7 @@ def clean_and_convert_price(price_str):
     except ValueError:
         return 0  # Si la conversion échoue, retourner 0
 
-# Fonction pour sauvegarder les données extraites dans un fichier CSV
-def save_to_csv(data, filename="extracted_data.csv"):
+def save_to_csv(data, filename="extracted_data.csv"): # Fonction pour sauvegarder les données extraites dans un fichier CSV avec timestamp
     headers = ["Name", "Trait", "Price"]  # Définir les en-têtes du CSV
 
     # Ouvrir le fichier en mode écriture
@@ -48,8 +47,7 @@ def save_to_csv(data, filename="extracted_data.csv"):
 
     print(f"Les données ont été sauvegardées dans le fichier {filename}")  # Afficher un message de confirmation
 
-# Fonction pour exécuter une instance de Selenium
-def run_selenium_instance(start_index, end_index):
+def run_selenium_instance(start_index, end_index): # Fonction pour exécuter une instance de Selenium
     # Définir les chemins pour les drivers
     driver_path = r'E:\ProgramationPerso\Drivers\chromedriver-win64\chromedriver.exe'
     brave_path = r"C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe"
@@ -57,7 +55,7 @@ def run_selenium_instance(start_index, end_index):
     # Configurer les options du navigateur
     options = Options()
     options.binary_location = brave_path
-    options.add_argument('--headless')  # Exécution sans interface graphique
+    options.add_argument('--headless')
     options.add_argument('--no-sandbox')
     options.add_argument('--disable-dev-shm-usage')
     options.add_argument('--disable-gpu')
@@ -65,16 +63,15 @@ def run_selenium_instance(start_index, end_index):
     options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36")
 
     service = Service(driver_path)
-    driver = webdriver.Chrome(service=service, options=options)  # Lancer le navigateur avec les options définies
+    driver = webdriver.Chrome(service=service, options=options)
 
     try:
-        driver.get("https://tldb.info/auction-house")  # Accéder à la page de l'enchère
+        driver.get("https://tldb.info/auction-house")
 
-        # Attendre la présence de la pagination pour s'assurer que la page est chargée
         WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, 'aside.dt-pagination-rowcount')))
 
         # Sélectionner les filtres (All et Europe)
-        driver.execute_script("""
+        driver.execute_script(""" 
             const dropdownButtons = document.querySelectorAll('.btn.btn-secondary.w-100.fw-semi-bold.dropdown-toggle');
             if (dropdownButtons.length > 0) {
                 dropdownButtons[0].click();  // Clic sur le premier dropdown
@@ -82,14 +79,14 @@ def run_selenium_instance(start_index, end_index):
         """)
         WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.CSS_SELECTOR, "div[start='true'].dropdown-menu.show")))
 
-        driver.execute_script("""
+        driver.execute_script(""" 
             const dropdownMenu = document.querySelector("div[start='true'].dropdown-menu.show");
             const allButton = Array.from(dropdownMenu.querySelectorAll("button"))
                 .find(button => button.textContent.trim() === "All");
             if (allButton) allButton.click();  // Clic sur le bouton "All"
         """)
 
-        driver.execute_script("""
+        driver.execute_script(""" 
             const dropdownButtons = document.querySelectorAll('.btn.btn-secondary.w-100.fw-semi-bold.dropdown-toggle');
             if (dropdownButtons.length > 1) {
                 dropdownButtons[1].click();  // Clic sur le deuxième dropdown
@@ -97,7 +94,7 @@ def run_selenium_instance(start_index, end_index):
         """)
         WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.CSS_SELECTOR, "div[start='true'].dropdown-menu.show")))
 
-        driver.execute_script("""
+        driver.execute_script(""" 
             const dropdownMenu = document.querySelector("div[start='true'].dropdown-menu.show");
             const europeButtons = Array.from(dropdownMenu.querySelectorAll("button"))
                 .filter(button => button.textContent.trim() === "Europe");
@@ -105,7 +102,7 @@ def run_selenium_instance(start_index, end_index):
         """)
 
         # Extraire le nombre total d'entrées depuis la pagination
-        pagination_text = driver.execute_script("""
+        pagination_text = driver.execute_script(""" 
             const paginationElement = document.querySelector('aside.dt-pagination-rowcount');
             return paginationElement ? paginationElement.textContent.trim() : null;
         """)
@@ -134,7 +131,7 @@ def run_selenium_instance(start_index, end_index):
             WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, 'tbody.align-middle')))
 
             # Récupérer le HTML de la table des détails
-            table_html = driver.execute_script("""
+            table_html = driver.execute_script(""" 
                 const table = document.querySelector('tbody.align-middle');
                 return table ? table.outerHTML : null;
             """)
@@ -167,7 +164,7 @@ def run_selenium_instance(start_index, end_index):
 
             # Retourner à la page principale
             WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.CSS_SELECTOR, '.btn.btn-secondary.fw-semi-bold.d-flex.align-items-center.gap-1.svelte-o8inv0')))
-            driver.execute_script("""
+            driver.execute_script(""" 
                 const goBackButton = document.querySelector('.btn.btn-secondary.fw-semi-bold.d-flex.align-items-center.gap-1.svelte-o8inv0');
                 if (goBackButton) goBackButton.click();  // Retourner à la liste principale
             """)
@@ -181,9 +178,27 @@ def run_selenium_instance(start_index, end_index):
     finally:
         driver.quit()  # Fermer le navigateur à la fin de l'exécution
 
-# Fonction principale pour diviser le travail et lancer les instances en parallèle
-def main():
-    total_entries = get_total_entries()  # Récupérer dynamiquement le nombre total d'entrées
+def get_total_entries(): # Fonction pour récupérer dynamiquement `total_entries`
+    driver = webdriver.Chrome() #! Ajoute le mode headless
+    driver.get("https://tldb.info/auction-house")
+
+    WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, 'aside.dt-pagination-rowcount')))
+
+    pagination_text = driver.execute_script(""" 
+        const paginationElement = document.querySelector('aside.dt-pagination-rowcount');
+        return paginationElement ? paginationElement.textContent.trim() : null;
+    """)
+    total_entries = 0
+    if pagination_text:
+        match = re.search(r'of (\d+) entries', pagination_text)
+        if match:
+            total_entries = int(match.group(1))
+
+    driver.quit()
+    return total_entries
+
+def main(): # Fonction principale pour diviser le travail et lancer les instances en parallèle
+    total_entries = get_total_entries()
     num_instances = 6  # Nombre d'instances (processus) à lancer en parallèle
     entries_per_instance = total_entries // num_instances  # Diviser les entrées entre les processus
 
@@ -200,37 +215,22 @@ def main():
         all_extracted_data.extend(result)
 
     print(f"Nombre total de données extraites : {len(all_extracted_data)}")
-    print_pretty_data(all_extracted_data)  # Affichage des données dans un joli tableau
+    print_pretty_data(all_extracted_data)
 
-    # Sauvegarder les données dans un fichier CSV
-    save_to_csv(all_extracted_data)  # Sauvegarde dans un fichier CSV
+    # Ajouter un timestamp au nom du fichier CSV
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    filename = f"extracted_data_{timestamp}.csv"
+    
+    save_to_csv(all_extracted_data, filename)
 
-# Fonction pour récupérer dynamiquement `total_entries`
-def get_total_entries():
-    driver = webdriver.Chrome()  # Créez une instance Selenium sans headless pour extraire le total
-    driver.get("https://tldb.info/auction-house")
+if __name__ == "__main__": # Lancer l'exécution toutes les 10 minutes
 
-    # Attendre la présence de la pagination
-    WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, 'aside.dt-pagination-rowcount')))
-
-    # Extraire le texte de la pagination pour obtenir le nombre total d'entrées
-    pagination_text = driver.execute_script("""
-        const paginationElement = document.querySelector('aside.dt-pagination-rowcount');
-        return paginationElement ? paginationElement.textContent.trim() : null;
-    """)
-    total_entries = 0
-    if pagination_text:
-        match = re.search(r'of (\d+) entries', pagination_text)
-        if match:
-            total_entries = int(match.group(1))
-
-    driver.quit()  # Fermer le navigateur
-    return total_entries
-
-# Lancer l'exécution principale
-if __name__ == "__main__":
-    start_time = time.time()
-    main()  # Appeler la fonction principale
-    end_time = time.time()
-    execution_time = end_time - start_time
-    print(f"Temps d'exécution du script : {execution_time:.2f} secondes")
+    while True:
+        start_time = time.time()
+        main()  # Appeler la fonction principale
+        end_time = time.time()
+        execution_time = end_time - start_time
+        print(f"Temps d'exécution du script : {execution_time:.2f} secondes")
+        
+        # Attendre 10 secondes avant la prochaine exécution
+        time.sleep(10)  
