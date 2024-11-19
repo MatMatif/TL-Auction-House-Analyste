@@ -7,11 +7,14 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 import pandas as pd
-import re  # Importation du module pour utiliser les expressions régulières
+import re  # Importation du module pour utiliser les expressions regulières
 
-extracted_data = []  # Liste pour stocker les données extraites
+extracted_data = []  # Liste pour stocker les donnees extraites
 
 try:
+    
+    start_time = time.time()
+
     # Configuration de Selenium avec le navigateur Brave
     driver_path = r'E:\ProgramationPerso\Drivers\chromedriver-win64\chromedriver.exe'  # Chemin vers le driver Chrome
     brave_path = r"C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe"  # Chemin vers Brave
@@ -31,20 +34,20 @@ try:
     service = Service(driver_path)
     driver = webdriver.Chrome(service=service, options=options)
 
-    # Désactivation de la détection de Selenium par les sites web (pour éviter d'être détecté)
+    # Desactivation de la detection de Selenium par les sites web (pour eviter d'être detecte)
     driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
 
-    # Désactivation des animations pour accélérer le processus
+    # Desactivation des animations pour accelerer le processus
     driver.execute_script(""" 
         const style = document.createElement('style');
         style.innerHTML = '*, *::before, *::after { transition: none !important; animation: none !important; }';
         document.head.appendChild(style);
     """)
 
-    # Étape 1 : Accéder à la page
+    # Étape 1 : Acceder à la page
     driver.get("https://tldb.info/auction-house")
 
-    # Attendre la présence de la pagination pour confirmer que la page est bien chargée
+    # Attendre la presence de la pagination pour confirmer que la page est bien chargee
     WebDriverWait(driver, 10).until(
         EC.presence_of_element_located((By.CSS_SELECTOR, 'aside.dt-pagination-rowcount'))
     )
@@ -83,7 +86,7 @@ try:
         if (europeButtons.length >= 2) europeButtons[1].click(); // Clic sur le deuxième bouton "Europe"
     """)
 
-    # Étape 4 : Récupérer le nombre total d'entrées à partir de la pagination
+    # Étape 4 : Recuperer le nombre total d'entrees à partir de la pagination
     pagination_text = driver.execute_script(""" 
         const paginationElement = document.querySelector('aside.dt-pagination-rowcount');
         if (paginationElement) {
@@ -93,41 +96,41 @@ try:
         }
     """)
 
-    # Utiliser une expression régulière pour extraire le nombre total d'entrées
+    # Utiliser une expression regulière pour extraire le nombre total d'entrees
     total_entries = 0
     if pagination_text:
         try:
             match = re.search(r'of (\d+) entries', pagination_text)
             if match:
                 total_entries = int(match.group(1))  # Extraire le nombre après 'of'
-                print(f"Nombre total d'entrées : {total_entries}")
+                print(f"Nombre total d'entrees : {total_entries}")
             else:
-                print("Aucun nombre d'entrées trouvé dans le texte de pagination.")
+                print("Aucun nombre d'entrees trouve dans le texte de pagination.")
         except Exception as e:
-            print(f"Erreur lors de l'extraction du nombre d'entrées : {e}")
+            print(f"Erreur lors de l'extraction du nombre d'entrees : {e}")
     else:
-        print("Impossible de récupérer le texte de pagination.")
+        print("Impossible de recuperer le texte de pagination.")
 
-    # Étape 5 : Itérer sur les éléments du tableau et extraire les données
-    for index in range(min(total_entries, 10)):  # Limité à 10 éléments pour l'exemple
-        # Sélectionner une ligne du tableau et cliquer sur l'élément pour charger les informations
+    # Étape 5 : Iterer sur les elements du tableau et extraire les donnees
+    for index in range(min(total_entries, 10)):  # Limite à 10 elements pour l'exemple
+        # Selectionner une ligne du tableau et cliquer sur l'element pour charger les informations
         driver.execute_script(f"""
             const tableRows = document.querySelectorAll('tbody.align-middle > tr');
             if (tableRows.length > {index}) {{
                 const row = tableRows[{index}];
                 const itemName = row.querySelector('.item-name .text-truncate span');
                 if (itemName) {{
-                    itemName.click(); // Clic sur l'élément
+                    itemName.click(); // Clic sur l'element
                 }}
             }}
         """)
 
-        # Attendre que la page des détails soit chargée
+        # Attendre que la page des details soit chargee
         WebDriverWait(driver, 10).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, 'tbody.align-middle'))
         )
 
-        # Récupérer le contenu HTML du tableau après chargement
+        # Recuperer le contenu HTML du tableau après chargement
         table_html = driver.execute_script(""" 
             const table = document.querySelector('tbody.align-middle');
             return table ? table.outerHTML : null;
@@ -138,7 +141,7 @@ try:
             with open(f"table_raw_{index}.html", "w", encoding="utf-8") as raw_file:
                 raw_file.write(table_html)
 
-            # Nettoyer et extraire les données à l'aide de BeautifulSoup
+            # Nettoyer et extraire les donnees à l'aide de BeautifulSoup
             soup = BeautifulSoup(table_html, "html.parser")
             rows = soup.find_all("tr", class_="ah-table-row")  # Filtrer uniquement les lignes avec cette classe
 
@@ -153,7 +156,7 @@ try:
                 del tag['class']
                 del tag['style']
 
-            # Sauvegarder le tableau nettoyé dans un nouveau fichier HTML
+            # Sauvegarder le tableau nettoye dans un nouveau fichier HTML
             with open(f"table_cleaned_{index}.html", "w", encoding="utf-8") as cleaned_file:
                 cleaned_file.write(str(tbody))
 
@@ -163,7 +166,7 @@ try:
 
             tbody = soup.find_all("tbody", class_="align-middle")[0]
 
-            # Extraction des données du tableau
+            # Extraction des donnees du tableau
             table_data = []
             for row in tbody.find_all("tr"):
                 try:
@@ -177,14 +180,14 @@ try:
                         "Price": price
                     })
                 except IndexError:
-                    continue  # Si une ligne est malformée, on l'ignore
+                    continue  # Si une ligne est malformee, on l'ignore
 
-            # Créer un DataFrame et le sauvegarder dans un fichier Excel
+            # Creer un DataFrame et le sauvegarder dans un fichier Excel
             df = pd.DataFrame(table_data)
             excel_file = f"table_data_{index}.xlsx"
             df.to_excel(excel_file, index=False, engine="openpyxl")
 
-            print(f"Les données ont été extraites et sauvegardées dans '{excel_file}'")
+            print(f"Les donnees ont ete extraites et sauvegardees dans '{excel_file}'")
 
         # Retourner à la liste principale
         WebDriverWait(driver, 10).until(
@@ -195,8 +198,12 @@ try:
             if (goBackButton) goBackButton.click();
         """)
 
-    print("Extraction terminée.")
-    print(extracted_data)  # Afficher les données extraites
+    end_time = time.time()
+    execution_time = end_time - start_time  # Temps d'execution en secondes
+
+    print("Extraction terminee.")
+    # Afficher le temps d'execution
+    print(f"Temps d'execution du script : {execution_time:.2f} secondes")
 
 except Exception as e:
     print(f"Une erreur s'est produite : {e}")
