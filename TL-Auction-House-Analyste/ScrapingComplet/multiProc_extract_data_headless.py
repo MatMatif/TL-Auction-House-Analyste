@@ -12,6 +12,14 @@ from bs4 import BeautifulSoup
 from prettytable import PrettyTable
 from datetime import datetime
 
+def clean_text(text):
+    """
+    Nettoie le texte en supprimant ou en remplaçant les caractères problématiques.
+    """
+    # Remplacer le caractère problématique (exemple: →) par une chaîne vide
+    cleaned_text = text.replace("→", "")
+    # Vous pouvez ajouter d'autres remplacements ici si nécessaire
+    return cleaned_text
 
 def print_pretty_data(data): # Fonction pour afficher les données extraites dans un joli tableau
     table = PrettyTable()
@@ -28,11 +36,11 @@ def clean_and_convert_price(price_str): # Fonction pour nettoyer et convertir le
     # Supprimer les espaces et symboles inutiles (comme $ ou €), puis convertir en int
     cleaned_price = price_str.replace(",", "").replace("€", "").replace("$", "").strip()
     try:
-        return int(cleaned_price)  # Retourner le prix sous forme d'entier
+        return int(cleaned_price)
     except ValueError:
-        return 0  # Si la conversion échoue, retourner 0
+        return 0
 
-def save_to_csv(data, filename="extracted_data.csv"): # Fonction pour sauvegarder les données extraites dans un fichier CSV avec timestamp
+def save_to_csv(data, filename="extracted_data.csv"):
     headers = ["Name", "Trait", "Price"]  # Définir les en-têtes du CSV
 
     # Ouvrir le fichier en mode écriture
@@ -40,12 +48,16 @@ def save_to_csv(data, filename="extracted_data.csv"): # Fonction pour sauvegarde
         writer = csv.DictWriter(file, fieldnames=headers)
         writer.writeheader()  # Écrire l'en-tête
 
-        # Écrire chaque ligne de données
+        # Écrire chaque ligne de données après nettoyage
         for item in data:
             for row in item:
+                row["Name"] = clean_text(row["Name"])
+                row["Trait"] = clean_text(row["Trait"])
+                row["Price"] = clean_text(str(row["Price"]))
                 writer.writerow(row)
 
-    print(f"Les données ont été sauvegardées dans le fichier {filename}")  # Afficher un message de confirmation
+    print(f"Les données ont été sauvegardées dans le fichier {filename}")
+
 
 def run_selenium_instance(start_index, end_index): # Fonction pour exécuter une instance de Selenium
     # Définir les chemins pour les drivers
