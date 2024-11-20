@@ -200,6 +200,13 @@ def get_total_entries(): # Fonction pour récupérer dynamiquement `total_entrie
         const paginationElement = document.querySelector('aside.dt-pagination-rowcount');
         return paginationElement ? paginationElement.textContent.trim() : null;
     """)
+    
+    if not pagination_text:
+        print("Erreur : Impossible de récupérer le texte de pagination. Attente de 1 minute et relance...")
+        time.sleep(60)  # Attendre 1 minute avant de relancer
+        driver.quit()
+        return get_total_entries()  # Relancer la fonction
+
     total_entries = 0
     if pagination_text:
         match = re.search(r'of (\d+) entries', pagination_text)
@@ -245,4 +252,4 @@ if __name__ == "__main__": # Lancer l'exécution toutes les 10 minutes
         print(f"Temps d'exécution du script : {execution_time:.2f} secondes")
         
         # Attendre 10 secondes avant la prochaine exécution
-        time.sleep(10)  
+        time.sleep(10)
