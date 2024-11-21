@@ -12,49 +12,98 @@ from bs4 import BeautifulSoup
 from prettytable import PrettyTable
 from datetime import datetime
 
+def extract_data(table_html):
+    soup = BeautifulSoup(table_html, 'html.parser')
+    headers = soup.find_all('th')
+    
+    for header in headers:
+        if header.get_text(strip=True) == "Trait":
+            soup = BeautifulSoup(table_html, "html.parser")
+            tbody = soup.find("tbody")
+            if tbody:
+                table_data = []
+                for row in tbody.find_all("tr"):
+                    try:
+                        name = row.find_all("td")[2].get_text(strip=True)
+                        trait = row.find_all("td")[3].get_text(strip=True)
+                        quantity = row.find_all("td")[4].get_text(strip=True)
+                        price = row.find_all("td")[5].get_text(strip=True)
+
+                        if name and trait and price and quantity:
+                            price_int = clean_and_convert_price(price)
+                            quantity_int = clean_and_convert_price(quantity)
+                            table_data.append({
+                                "Name": name,
+                                "Trait": trait,
+                                "Price": price_int,
+                                "Quantity": quantity_int
+                            })
+                    except IndexError:
+                        continue
+                return table_data
+
+        else:
+            soup = BeautifulSoup(table_html, "html.parser")
+            tbody = soup.find("tbody")
+            if tbody:
+                table_data = []
+                for row in tbody.find_all("tr"):
+                    try:
+                        name = row.find_all("td")[2].get_text(strip=True)
+                        trait = "NONE"
+                        quantity = row.find_all("td")[3].get_text(strip=True)
+                        price = row.find_all("td")[4].get_text(strip=True)
+
+                        if name and trait and price and quantity:
+                            price_int = clean_and_convert_price(price)
+                            quantity_int = clean_and_convert_price(quantity)
+                            table_data.append({
+                                "Name": name,
+                                "Trait": trait,
+                                "Price": price_int,
+                                "Quantity": quantity_int
+                            })
+                    except IndexError:
+                        continue
+                return table_data
+
 def clean_text(text):
-    """
-    Nettoie le texte en supprimant ou en remplaçant les caractères problématiques.
-    """
-    # Remplacer le caractère problématique (exemple: →) par une chaîne vide
     cleaned_text = text.replace("→", "")
-    # Vous pouvez ajouter d'autres remplacements ici si nécessaire
     return cleaned_text
 
 def print_pretty_data(data): # Fonction pour afficher les données extraites dans un joli tableau
     table = PrettyTable()
-    table.field_names = ["Name", "Trait", "Price"]  # Définir les noms des colonnes
+    table.field_names = ["Name", "Trait", "Price"]
 
-    # Remplir le tableau avec les données extraites
     for item in data:
         for row in item:
             table.add_row([row["Name"], row["Trait"], row["Price"]])
 
-    print(table)  # Afficher le tableau
+    print(table)
 
 def clean_and_convert_price(price_str): # Fonction pour nettoyer et convertir le prix en entier
-    # Supprimer les espaces et symboles inutiles (comme $ ou €), puis convertir en int
-    cleaned_price = price_str.replace(",", "").replace("€", "").replace("$", "").strip()
+    cleaned_price = price_str.replace(",", "").strip()
     try:
         return int(cleaned_price)
     except ValueError:
         return 0
 
 def save_to_csv(data, filename="extracted_data.csv"):
-    headers = ["Name", "Trait", "Price"]  # Définir les en-têtes du CSV
+    headers = ["Name", "Trait", "Quantity", "Price"]
 
-    # Ouvrir le fichier en mode écriture
     with open(filename, mode="w", newline="", encoding="utf-8") as file:
         writer = csv.DictWriter(file, fieldnames=headers)
-        writer.writeheader()  # Écrire l'en-tête
+        writer.writeheader()
 
-        # Écrire chaque ligne de données après nettoyage
         for item in data:
-            for row in item:
-                row["Name"] = clean_text(row["Name"])
-                row["Trait"] = clean_text(row["Trait"])
-                row["Price"] = clean_text(str(row["Price"]))
-                writer.writerow(row)
+            if isinstance(item, dict):
+                item["Name"] = clean_text(item["Name"])
+                item["Trait"] = clean_text(item["Trait"])
+                item["Price"] = clean_text(str(item["Price"]))
+                item["Quantity"] = clean_text(str(item["Quantity"]))
+                writer.writerow(item)
+            else:
+                print(f"Les données ne sont pas dans le dictionary: {item}")
 
     print(f"Les données ont été sauvegardées dans le fichier {filename}")
 
@@ -124,10 +173,31 @@ def run_selenium_instance(start_index, end_index): # Fonction pour exécuter une
             if match:
                 total_entries = int(match.group(1))
 
-        print(f"Nombre total d'entrées : {total_entries}")  # Afficher le nombre total d'entrées
+        print(f"Nombre total d'entrées : {total_entries}")
 
-        # Parcourir les entrées entre start_index et end_index
         extracted_data = []
+        total_quantity = 0
+        
+        # Parcourir les entrées entre start_index et end_index
+        for index in range(start_index, min(end_index, total_entries)):
+            # Récupérer la quantité depuis le tableau principal avant de cliquer
+            quantity = driver.execute_script(f"""
+                const tableRows = document.querySelectorAll('tbody.align-middle > tr');
+                if (tableRows.length > {index}) {{
+                    const row = tableRows[{index}];
+                    const quantityElement = row.querySelector('td:nth-child(4) span');
+                    return quantityElement ? quantityElement.textContent.trim() : null;
+                }}
+                return null;
+            """)
+
+            # Convertir la quantité en entier et l'ajouter à la somme totale
+            if quantity:
+                try:
+                    total_quantity += int(clean_and_convert_price(quantity))
+                except ValueError:
+                    print(f"Quantité invalide trouvée pour l'index {index}: {quantity}")
+        
         for index in range(start_index, min(end_index, total_entries)):
             driver.execute_script(f"""
                 const tableRows = document.querySelectorAll('tbody.align-middle > tr');
@@ -135,7 +205,7 @@ def run_selenium_instance(start_index, end_index): # Fonction pour exécuter une
                     const row = tableRows[{index}];
                     const itemName = row.querySelector('.item-name .text-truncate span');
                     if (itemName) {{
-                        itemName.click();  // Clic sur l'élément pour ouvrir ses détails
+                        itemName.click();
                     }}
                 }}
             """)
@@ -144,35 +214,11 @@ def run_selenium_instance(start_index, end_index): # Fonction pour exécuter une
 
             # Récupérer le HTML de la table des détails
             table_html = driver.execute_script(""" 
-                const table = document.querySelector('tbody.align-middle');
+                const table = document.querySelector('table.table.table-striped.table-borderless.svelte-vjrwi3');
                 return table ? table.outerHTML : null;
             """)
 
-            # Si la table est récupérée, la parser et extraire les données
-            if table_html:
-                soup = BeautifulSoup(table_html, "html.parser")
-                tbody = soup.find("tbody")
-
-                if tbody:
-                    table_data = []
-                    for row in tbody.find_all("tr"):
-                        try:
-                            name = row.find_all("td")[2].get_text(strip=True)
-                            trait = row.find_all("td")[3].get_text(strip=True)
-                            price = row.find_all("td")[5].get_text(strip=True)
-
-                            if name and trait and price:
-                                # Convertir le prix en entier
-                                price_int = clean_and_convert_price(price)
-                                table_data.append({
-                                    "Name": name,
-                                    "Trait": trait,
-                                    "Price": price_int
-                                })
-                        except IndexError:
-                            continue
-                    
-                    extracted_data.append(table_data)
+            extracted_data = extract_data(table_html)
 
             # Retourner à la page principale
             WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.CSS_SELECTOR, '.btn.btn-secondary.fw-semi-bold.d-flex.align-items-center.gap-1.svelte-o8inv0')))
@@ -181,40 +227,43 @@ def run_selenium_instance(start_index, end_index): # Fonction pour exécuter une
                 if (goBackButton) goBackButton.click();  // Retourner à la liste principale
             """)
 
-        return extracted_data
+        return extracted_data, total_quantity
 
     except Exception as e:
         print(f"Une erreur s'est produite dans l'instance Selenium : {e}")
-        return []  # Retourne une liste vide en cas d'erreur
+        return []
 
     finally:
-        driver.quit()  # Fermer le navigateur à la fin de l'exécution
-
-def get_total_entries(): # Fonction pour récupérer dynamiquement `total_entries`
-    driver = webdriver.Chrome() #! Ajoute le mode headless
-    driver.get("https://tldb.info/auction-house")
-
-    WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, 'aside.dt-pagination-rowcount')))
-
-    pagination_text = driver.execute_script(""" 
-        const paginationElement = document.querySelector('aside.dt-pagination-rowcount');
-        return paginationElement ? paginationElement.textContent.trim() : null;
-    """)
-    
-    if not pagination_text:
-        print("Erreur : Impossible de récupérer le texte de pagination. Attente de 1 minute et relance...")
-        time.sleep(60)  # Attendre 1 minute avant de relancer
         driver.quit()
-        return get_total_entries()  # Relancer la fonction
 
-    total_entries = 0
-    if pagination_text:
-        match = re.search(r'of (\d+) entries', pagination_text)
-        if match:
-            total_entries = int(match.group(1))
+def get_total_entries(max_retries=5):
+    retries = 0
+    while retries < max_retries:
+        try:
+            driver = webdriver.Chrome()  #! Mode headless
+            driver.get("https://tldb.info/auction-house")
+
+            WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, 'aside.dt-pagination-rowcount')))
+
+            pagination_text = driver.execute_script(""" 
+                const paginationElement = document.querySelector('aside.dt-pagination-rowcount');
+                return paginationElement ? paginationElement.textContent.trim() : null;
+            """)
+
+            if pagination_text:
+                match = re.search(r'of (\d+) entries', pagination_text)
+                if match:
+                    total_entries = int(match.group(1))
+                    driver.quit()
+                    return total_entries
+
+        except Exception as e:
+            print(f"Erreur lors de la récupération des entrées: {e}")
+            retries += 1
+            time.sleep(30)
 
     driver.quit()
-    return total_entries
+    return 0
 
 def main(): # Fonction principale pour diviser le travail et lancer les instances en parallèle
     total_entries = get_total_entries()
@@ -224,32 +273,32 @@ def main(): # Fonction principale pour diviser le travail et lancer les instance
     # Diviser le travail en sous-ensembles pour chaque instance
     index_ranges = [(i * entries_per_instance, (i + 1) * entries_per_instance) for i in range(num_instances)]
 
-    # Lancer les instances en parallèle avec multiprocessing.Pool
     with Pool(num_instances) as pool:
         results = pool.starmap(run_selenium_instance, index_ranges)
 
-    # Combiner les données extraites de toutes les instances
     all_extracted_data = []
-    for result in results:
+    total_quantity_sum = 0
+    
+    for result, instance_quantity in results:
         all_extracted_data.extend(result)
+        total_quantity_sum += instance_quantity
 
     print(f"Nombre total de données extraites : {len(all_extracted_data)}")
-    print_pretty_data(all_extracted_data)
+    print(f"Quantite totale de tous les objets : {total_quantity_sum}")
+    #print_pretty_data(all_extracted_data)
 
-    # Ajouter un timestamp au nom du fichier CSV
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     filename = f"extracted_data_{timestamp}.csv"
     
     save_to_csv(all_extracted_data, filename)
 
-if __name__ == "__main__": # Lancer l'exécution toutes les 10 minutes
-
-    while True:
+if __name__ == "__main__":
+    aa = 0
+    while aa != 1:
         start_time = time.time()
-        main()  # Appeler la fonction principale
+        main()  
         end_time = time.time()
         execution_time = end_time - start_time
         print(f"Temps d'exécution du script : {execution_time:.2f} secondes")
-        
-        # Attendre 10 secondes avant la prochaine exécution
+        aa = 1
         time.sleep(10)
