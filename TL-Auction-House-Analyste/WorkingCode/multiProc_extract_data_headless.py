@@ -12,14 +12,11 @@ from bs4 import BeautifulSoup
 from prettytable import PrettyTable
 from datetime import datetime
 
-def clean_text(text):
-    """
-    Nettoie le texte en supprimant ou en remplaçant les caractères problématiques.
-    """
-    # Remplacer le caractère problématique (exemple: →) par une chaîne vide
-    cleaned_text = text.replace("→", "")
-    # Vous pouvez ajouter d'autres remplacements ici si nécessaire
-    return cleaned_text
+def clean_string(s):
+    """Nettoie une chaîne en supprimant les espaces superflus, les nouvelles lignes et autres caractères non désirés."""
+    if s:
+        return re.sub(r'\s+', ' ', s.strip().replace("\n", " ").replace("\t", " ").replace("\r", ""))
+    return s
 
 def print_pretty_data(data): # Fonction pour afficher les données extraites dans un joli tableau
     table = PrettyTable()
@@ -32,11 +29,16 @@ def print_pretty_data(data): # Fonction pour afficher les données extraites dan
 
     print(table)
 
-def clean_and_convert_price(price_str): # Fonction pour nettoyer et convertir le prix en entier
-    # Supprimer les espaces et symboles inutiles (comme $ ou €), puis convertir en int
-    cleaned_price = price_str.replace(",", "").replace("€", "").replace("$", "").strip()
+def clean_and_convert_to_number(value):
+    """Convertit une chaîne en float ou int, en gérant les séparateurs de milliers et décimaux."""
     try:
-        return int(cleaned_price)
+        value = value.strip()
+        if "," in value:
+            value = value.replace(",", "")
+        number = float(value)
+        if number.is_integer():
+            return int(number)
+        return number
     except ValueError:
         return 0
 
@@ -51,24 +53,12 @@ def save_to_csv(data, filename="extracted_data.csv"):
         # Écrire chaque ligne de données après nettoyage
         for item in data:
             for row in item:
-                row["Name"] = clean_text(row["Name"])
-                row["Trait"] = clean_text(row["Trait"])
-                row["Price"] = clean_text(str(row["Price"]))
+                row["Name"] = row["Name"]
+                row["Trait"] = row["Trait"]
+                row["Price"] = str(row["Price"])
                 writer.writerow(row)
 
     print(f"Les données ont été sauvegardées dans le fichier {filename}")
-
-
-import re
-from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.chrome.options import Options
-from bs4 import BeautifulSoup
-
 
 def init_driver():
     """Initialiser et retourner le driver Selenium."""
@@ -135,9 +125,32 @@ def extract_total_entries(driver):
             total_entries = int(match.group(1))
     return total_entries
 
+def parse_table_html(table_html):
+    """Parse le HTML de la table et retourne les données extraites."""
+    extracted_data = []
+    if table_html:
+        soup = BeautifulSoup(table_html, "html.parser")
+        tbody = soup.find("tbody")
+        if tbody:
+            for row in tbody.find_all("tr"):
+                try:
+                    name = row.find_all("td")[2].get_text(strip=True)
+                    trait = row.find_all("td")[3].get_text(strip=True)
+                    price = row.find_all("td")[5].get_text(strip=True)
 
-def extract_table_data(driver, index):
-    """Extraire les données de la table d'une page."""
+                    if name and trait and price:
+                        price_int = clean_and_convert_to_number(price)  # Fonction de conversion
+                        extracted_data.append({
+                            "Name": name,
+                            "Trait": trait,
+                            "Price": price_int
+                        })
+                except IndexError:
+                    continue
+    return extracted_data
+
+def click_and_get_table_html(driver, index):
+    """Clique sur l'élément pour ouvrir les détails et retourne le HTML de la table."""
     driver.execute_script(f"""
         const tableRows = document.querySelectorAll('tbody.align-middle > tr');
         if (tableRows.length > {index}) {{
@@ -150,35 +163,18 @@ def extract_table_data(driver, index):
     """)
 
     WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, 'tbody.align-middle')))
-
-    # Récupérer le HTML de la table des détails
     table_html = driver.execute_script("""
         const table = document.querySelector('tbody.align-middle');
         return table ? table.outerHTML : null;
     """)
-    
-    # Parser la table et extraire les données
-    extracted_data = []
-    if table_html:
-        soup = BeautifulSoup(table_html, "html.parser")
-        tbody = soup.find("tbody")
-        
-        if tbody:
-            for row in tbody.find_all("tr"):
-                try:
-                    name = row.find_all("td")[2].get_text(strip=True)
-                    trait = row.find_all("td")[3].get_text(strip=True)
-                    price = row.find_all("td")[5].get_text(strip=True)
 
-                    if name and trait and price:
-                        price_int = clean_and_convert_price(price)  # Fonction de conversion
-                        extracted_data.append({
-                            "Name": name,
-                            "Trait": trait,
-                            "Price": price_int
-                        })
-                except IndexError:
-                    continue
+    return table_html
+
+def extract_table_data(driver, index):
+    """Extraire les données de la table d'une page."""
+    table_html = click_and_get_table_html(driver, index)
+    extracted_data = parse_table_html(table_html)
+
     return extracted_data
 
 

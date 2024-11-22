@@ -31,16 +31,15 @@ def parse_table_html(table_html):
             for row in tbody.find_all("tr"):
                 try:
                     name = clean_string(row.find_all("td")[2].get_text(strip=True))
-                    trait = clean_string(row.find_all("td")[3].get_text(strip=True))
-                    quantity = clean_string(row.find_all("td")[4].get_text(strip=True))
-                    price = clean_string(row.find_all("td")[5].get_text(strip=True))
+                    quantity = clean_string(row.find_all("td")[3].get_text(strip=True))
+                    price = clean_string(row.find_all("td")[4].get_text(strip=True))
 
-                    if name and trait and quantity and price:
+                    if name and quantity and price:
                         price_int = clean_and_convert_to_number(price)
                         quantity_int = clean_and_convert_to_number(quantity)
                         extracted_data.append({
                             "Name": name,
-                            "Trait": trait,
+                            "Trait": "NONE",
                             "Quantity": quantity_int,
                             "Price": price_int
                         })
@@ -58,7 +57,6 @@ def valid_html():
                 <td>1</td>
                 <td>Item 1</td>
                 <td>Name 1</td>
-                <td>Trait 1</td>
                 <td>10</td>
                 <td>0.500</td>
             </tr>
@@ -66,7 +64,6 @@ def valid_html():
                 <td>2</td>
                 <td>Item 2</td>
                 <td>Name 2</td>
-                <td>Trait 2</td>
                 <td>1</td>
                 <td>2,000.51</td>
             </tr>
@@ -76,8 +73,7 @@ def valid_html():
 
 @pytest.fixture # Fixture pour récupérer le contenu HTML depuis un fichier
 def html_from_file():
-    """Fixture qui lit un fichier HTML et retourne son contenu."""
-    with open("details_page_trait_sample.html", "r", encoding="utf-8") as file:
+    with open("details_page_no_trait_sample.html", "r", encoding="utf-8") as file:
         html_content = file.read()
     return html_content
 
@@ -107,7 +103,6 @@ def incorrect_data():
                 <td>1</td>
                 <td>Item 1</td>
                 <td>Name 1</td>
-                <td>Trait 1</td>
                 <td>pipi</td>
                 <td>prout</td>
             </tr>
@@ -117,8 +112,8 @@ def incorrect_data():
 
 def test_parse_table_html_valid(valid_html): # Cas de données valides
     expected_data = [
-        {"Name": "Name 1", "Trait": "Trait 1", "Quantity": 10, "Price": 0.5},
-        {"Name": "Name 2", "Trait": "Trait 2", "Quantity": 1, "Price": 2000.51}
+        {"Name": "Name 1", "Trait": "NONE", "Quantity": 10, "Price": 0.5},
+        {"Name": "Name 2", "Trait": "NONE", "Quantity": 1, "Price": 2000.51}
     ]
     
     result = parse_table_html(valid_html)
@@ -126,16 +121,16 @@ def test_parse_table_html_valid(valid_html): # Cas de données valides
 
 def test_parse_table_html_from_file(html_from_file):  # Cas avec HTML lu depuis le fichier
     expected_data = [
-        {"Name": "Aelon's Rejuvenating Longbow", "Trait": "Mana Regen", "Quantity": 1, "Price": 2100},
-        {"Name": "Aelon's Rejuvenating Longbow", "Trait": "Max Mana", "Quantity": 1, "Price": 2100},
-        {"Name": "Aelon's Rejuvenating Longbow", "Trait": "Max Mana", "Quantity": 1, "Price": 2139},
-        {"Name": "Aelon's Rejuvenating Longbow", "Trait": "Construct Bonus Damage", "Quantity": 1, "Price": 2140},
-        {"Name": "Aelon's Rejuvenating Longbow", "Trait": "Construct Bonus Damage", "Quantity": 1, "Price": 2150},
-        {"Name": "Aelon's Rejuvenating Longbow", "Trait": "Construct Bonus Damage", "Quantity": 1, "Price": 2150},
-        {"Name": "Aelon's Rejuvenating Longbow", "Trait": "Mana Regen", "Quantity": 1, "Price": 2199},
-        {"Name": "Aelon's Rejuvenating Longbow", "Trait": "Hit Chance", "Quantity": 1, "Price": 2499},
-        {"Name": "Aelon's Rejuvenating Longbow", "Trait": "Max Mana", "Quantity": 1, "Price": 2499},
-        {"Name": "Aelon's Rejuvenating Longbow", "Trait": "Construct Bonus Damage", "Quantity": 1, "Price": 2500}
+        {"Name": "Quality Marind", "Trait": "NONE", "Quantity": 1000, "Price": 0.047},
+        {"Name": "Quality Marind", "Trait": "NONE", "Quantity": 1000, "Price": 0.047},
+        {"Name": "Quality Marind", "Trait": "NONE", "Quantity": 1000, "Price": 0.047},
+        {"Name": "Quality Marind", "Trait": "NONE", "Quantity": 1000, "Price": 0.047},
+        {"Name": "Quality Marind", "Trait": "NONE", "Quantity": 1000, "Price": 0.047},
+        {"Name": "Quality Marind", "Trait": "NONE", "Quantity": 1000, "Price": 0.047},
+        {"Name": "Quality Marind", "Trait": "NONE", "Quantity": 1000, "Price": 0.047},
+        {"Name": "Quality Marind", "Trait": "NONE", "Quantity": 1000, "Price": 0.047},
+        {"Name": "Quality Marind", "Trait": "NONE", "Quantity": 1000, "Price": 0.047},
+        {"Name": "Quality Marind", "Trait": "NONE", "Quantity": 1000, "Price": 0.047}
     ]
     
     result = parse_table_html(html_from_file)
@@ -151,6 +146,6 @@ def test_parse_table_html_invalid_structure(invalid_structure): # Cas ou la stru
 
 def test_parse_table_html_incorrect_data(incorrect_data): # Cas ou les données sont incorrectes dans la colonne de quantité
     result = parse_table_html(incorrect_data)
-    assert result == [{"Name": "Name 1", "Trait": "Trait 1", "Quantity": 0, "Price": 0}], f"Échec: {result}"
+    assert result == [{"Name": "Name 1", "Trait": "NONE", "Quantity": 0, "Price": 0}], f"Échec: {result}"
 
 
