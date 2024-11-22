@@ -8,14 +8,14 @@ with open("table_raw.html", "r", encoding="utf-8") as f:
 tbody = soup.find_all("tbody", class_="align-middle")[0]
 
 # Supprimer les balises inutiles ou vides
-for tag in tbody.find_all(["span", "div", "svg", "img", "a", "path"]):  # Cherche les balises à nettoyer
-    if not tag.get_text(strip=True):  # Si elles ne contiennent pas de texte utile
+for tag in tbody.find_all(["span", "div", "svg", "img", "a", "path"]):
+    if not tag.get_text(strip=True):
         tag.decompose()  # Supprime la balise du DOM
 
 # Supprimer les attributs inutiles dans les balises restantes
-for tag in tbody.find_all(True):  # Parcourir toutes les balises restantes
-    del tag['class']  # Supprimer l'attribut "class"
-    del tag['style']  # Supprimer l'attribut "style"
+for tag in tbody.find_all(True):
+    del tag['class']
+    del tag['style']
 
 # Sauvegarder le contenu nettoyé dans un nouveau fichier HTML
 with open("table_cleaned.html", "w", encoding="utf-8") as f:
