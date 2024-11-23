@@ -12,49 +12,109 @@ from bs4 import BeautifulSoup
 from prettytable import PrettyTable
 from datetime import datetime
 
+from bs4 import BeautifulSoup
+
+def nettoyer_et_simplifier_html(contenu_html):
+    try:
+        soup = BeautifulSoup(contenu_html, "html.parser")
+        tbody = soup.find("tbody", class_="align-middle")
+
+        if not tbody:
+            print("Aucun <tbody> avec la classe 'align-middle' trouvé.")
+            return str(soup)
+
+        for tag in tbody.find_all(["span", "div", "svg", "img", "a", "path"]):
+            if not tag.get_text(strip=True):
+                tag.decompose()
+
+        for ligne in tbody.find_all("tr"):
+            cellules = ligne.find_all("td")
+            if all(not cellule.get_text(strip=True) for cellule in cellules):
+                ligne.decompose()
+
+        for tag in tbody.find_all(True):
+            tag.attrs = {key: value for key, value in tag.attrs.items() if key not in ["class", "style"]}
+
+        return str(tbody)
+    
+    except Exception as e:
+        print(f"Erreur lors du traitement : {e}")
+        return contenu_html
+
+def creer_fichier(contenu, nom_fichier):
+    try:
+        with open(nom_fichier, 'w', encoding='utf-8') as fichier:
+            fichier.write(contenu)
+        print(f"Le fichier '{nom_fichier}' a été créé avec succès.")
+    except Exception as e:
+        print(f"Une erreur s'est produite lors de la création du fichier : {e}")
+
+
+def clean_and_convert_to_number(value):
+    try:
+        value = value.strip()
+        if "," in value:
+            value = value.replace(",", "")
+        number = float(value)
+        if number.is_integer():
+            return int(number)
+        return number
+    except ValueError:
+        print(f"Failed to convert '{value}' to a number")
+        return 0
+
+def check_trait_column_in_html(table_html):
+    if table_html:
+        soup = BeautifulSoup(table_html, "html.parser")
+        thead = soup.find("thead")
+        print("TH trouver\n")
+        if thead:
+            for th in thead.find_all("th"):
+                if 'Trait' in th.get_text(strip=True):
+                    print("Trait trouver\n")
+                    return True
+    return False
+
 def clean_text(text):
     """
     Nettoie le texte en supprimant ou en remplaçant les caractères problématiques.
     """
-    # Remplacer le caractère problématique (exemple: →) par une chaîne vide
     cleaned_text = text.replace("→", "")
-    # Vous pouvez ajouter d'autres remplacements ici si nécessaire
     return cleaned_text
+
+def clean_string(s):
+    if s:
+        return re.sub(r'\s+', ' ', s.strip().replace("\n", " ").replace("\t", " ").replace("\r", ""))
+    return s
 
 def print_pretty_data(data): # Fonction pour afficher les données extraites dans un joli tableau
     table = PrettyTable()
-    table.field_names = ["Name", "Trait", "Price"]  # Définir les noms des colonnes
+    table.field_names = ["Name", "Trait", "Price"]
 
-    # Remplir le tableau avec les données extraites
     for item in data:
         for row in item:
             table.add_row([row["Name"], row["Trait"], row["Price"]])
 
-    print(table)  # Afficher le tableau
-
-def clean_and_convert_price(price_str): # Fonction pour nettoyer et convertir le prix en entier
-    # Supprimer les espaces et symboles inutiles (comme $ ou €), puis convertir en int
-    cleaned_price = price_str.replace(",", "").replace("€", "").replace("$", "").strip()
-    try:
-        return int(cleaned_price)
-    except ValueError:
-        return 0
+    print(table)
 
 def save_to_csv(data, filename="extracted_data.csv"):
-    headers = ["Name", "Trait", "Price"]  # Définir les en-têtes du CSV
+    headers = ["Name", "Trait", "Price", "Quantity"]
 
-    # Ouvrir le fichier en mode écriture
     with open(filename, mode="w", newline="", encoding="utf-8") as file:
         writer = csv.DictWriter(file, fieldnames=headers)
-        writer.writeheader()  # Écrire l'en-tête
+        writer.writeheader()
 
-        # Écrire chaque ligne de données après nettoyage
         for item in data:
             for row in item:
-                row["Name"] = clean_text(row["Name"])
-                row["Trait"] = clean_text(row["Trait"])
-                row["Price"] = clean_text(str(row["Price"]))
-                writer.writerow(row)
+                print("Processing row:", row)
+                if isinstance(row, dict):
+                    row["Name"] = clean_text(row.get("Name", ""))
+                    row["Trait"] = clean_text(row.get("Trait", ""))
+                    row["Price"] = clean_text(str(row.get("Price", "")))
+                    row["Quantity"] = clean_text(str(row.get("Quantity", "")))
+                    writer.writerow(row)
+                #else:
+                    #print(f"Skipping invalid row: {row}")
 
     print(f"Les données ont été sauvegardées dans le fichier {filename}")
 
@@ -126,8 +186,9 @@ def run_selenium_instance(start_index, end_index): # Fonction pour exécuter une
 
         print(f"Nombre total d'entrées : {total_entries}")  # Afficher le nombre total d'entrées
 
+        i = 0
+
         # Parcourir les entrées entre start_index et end_index
-        extracted_data = []
         for index in range(start_index, min(end_index, total_entries)):
             driver.execute_script(f"""
                 const tableRows = document.querySelectorAll('tbody.align-middle > tr');
@@ -144,35 +205,79 @@ def run_selenium_instance(start_index, end_index): # Fonction pour exécuter une
 
             # Récupérer le HTML de la table des détails
             table_html = driver.execute_script(""" 
-                const table = document.querySelector('tbody.align-middle');
+                const table = document.querySelector('table table-striped table-borderless svelte-vjrwi3');
                 return table ? table.outerHTML : null;
             """)
+            is_trait_column = check_trait_column_in_html(table_html)
 
-            # Si la table est récupérée, la parser et extraire les données
-            if table_html:
-                soup = BeautifulSoup(table_html, "html.parser")
-                tbody = soup.find("tbody")
+            creer_fichier(table_html, f"FichierLog{i}.html")
+            i += 1
+            
+            table_html = nettoyer_et_simplifier_html(table_html)
+            table_data = []
 
-                if tbody:
-                    table_data = []
-                    for row in tbody.find_all("tr"):
-                        try:
-                            name = row.find_all("td")[2].get_text(strip=True)
-                            trait = row.find_all("td")[3].get_text(strip=True)
-                            price = row.find_all("td")[5].get_text(strip=True)
+            if is_trait_column == True:
+                if table_html:
+                    soup = BeautifulSoup(table_html, "html.parser")
+                    tbody = soup.find("tbody")
+                    if tbody:
+                        for row in tbody.find_all("tr"):
+                            try:
+                                print("in trait\n")
+                                name = clean_string(row.find_all("td")[2].get_text(strip=True))
+                                trait = clean_string(row.find_all("td")[3].get_text(strip=True))
+                                quantity = clean_string(row.find_all("td")[4].get_text(strip=True))
+                                price = clean_string(row.find_all("td")[5].get_text(strip=True))
+                                #print("TRAIT", "name:", name, "trait:", trait, "quantity:", quantity, "price:", price, "\n")
+                                if name and trait and quantity and price:
+                                    price_int = clean_and_convert_to_number(price)
+                                    quantity_int = clean_and_convert_to_number(quantity)
+                                    if quantity_int > 0:
+                                        table_data.append({
+                                            "Name": name,
+                                            "Trait": trait,
+                                            "Quantity": quantity_int,
+                                            "Price": price_int
+                                        })
+                                        print(table_data[-1], "\n")
+                                    else:
+                                        print("\nrien na été append\n")
+                                        continue
+                                        print(row, "\n")
+                                    #print(table_data[-1], "\n")
 
-                            if name and trait and price:
-                                # Convertir le prix en entier
-                                price_int = clean_and_convert_price(price)
-                                table_data.append({
-                                    "Name": name,
-                                    "Trait": trait,
-                                    "Price": price_int
-                                })
-                        except IndexError:
-                            continue
-                    
-                    extracted_data.append(table_data)
+                            except IndexError:
+                                continue
+            else:
+                if table_html:
+                    soup = BeautifulSoup(table_html, "html.parser")
+                    tbody = soup.find("tbody")
+
+                    if tbody:
+                        for row in tbody.find_all("tr"):
+                            try:
+                                print("in no trait\n")
+                                name = clean_string(row.find_all("td")[2].get_text(strip=True))
+                                quantity = clean_string(row.find_all("td")[3].get_text(strip=True))
+                                price = clean_string(row.find_all("td")[4].get_text(strip=True))
+                                #print("TRAITLESS", "name:", name, "quantity:", quantity, "price:", price, "\n")
+                                if name and quantity and price:
+                                    price_int = clean_and_convert_to_number(price)
+                                    quantity_int = clean_and_convert_to_number(quantity)
+                                    if quantity_int > 0:
+                                        table_data.append({
+                                            "Name": name,
+                                            "Trait": "NONE",
+                                            "Quantity": quantity_int,
+                                            "Price": price_int
+                                        })
+                                        print(table_data[-1], "\n")
+                                    else:
+                                        continue
+                                        print(row, "\n")
+                                    #print(table_data[-1], "\n")
+                            except IndexError:
+                                continue
 
             # Retourner à la page principale
             WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.CSS_SELECTOR, '.btn.btn-secondary.fw-semi-bold.d-flex.align-items-center.gap-1.svelte-o8inv0')))
@@ -180,8 +285,8 @@ def run_selenium_instance(start_index, end_index): # Fonction pour exécuter une
                 const goBackButton = document.querySelector('.btn.btn-secondary.fw-semi-bold.d-flex.align-items-center.gap-1.svelte-o8inv0');
                 if (goBackButton) goBackButton.click();  // Retourner à la liste principale
             """)
-
-        return extracted_data
+        print(table_data)
+        return table_data
 
     except Exception as e:
         print(f"Une erreur s'est produite dans l'instance Selenium : {e}")
@@ -234,7 +339,7 @@ def main(): # Fonction principale pour diviser le travail et lancer les instance
         all_extracted_data.extend(result)
 
     print(f"Nombre total de données extraites : {len(all_extracted_data)}")
-    print_pretty_data(all_extracted_data)
+    #print_pretty_data(all_extracted_data)
 
     # Ajouter un timestamp au nom du fichier CSV
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
