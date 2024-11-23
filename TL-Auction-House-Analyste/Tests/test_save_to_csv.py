@@ -15,11 +15,14 @@ def save_to_csv(data, filename="extracted_data.csv"):
 
         for item in data:
             for row in item:
-                row["Name"] = clean_text(row.get("Name", ""))
-                row["Trait"] = clean_text(row.get("Trait", ""))
-                row["Price"] = clean_text(str(row.get("Price", "")))
-                row["Quantity"] = clean_text(str(row.get("Quantity", "")))
-                writer.writerow(row)
+                if isinstance(row, dict):
+                    row["Name"] = clean_text(row.get("Name", ""))
+                    row["Trait"] = clean_text(row.get("Trait", ""))
+                    row["Price"] = clean_text(str(row.get("Price", "")))
+                    row["Quantity"] = clean_text(str(row.get("Quantity", "")))
+                    writer.writerow(row)
+                else:
+                    print(f"Skipping invalid row: {row}")
 
     print(f"Les données ont été sauvegardées dans le fichier {filename}")
 

@@ -5,10 +5,9 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
-import re  # Importation du module pour utiliser les expressions régulières
+import re
 
 try:
-    # Configuration de Selenium avec le navigateur Brave
     driver_path = r'E:\ProgramationPerso\Drivers\chromedriver-win64\chromedriver.exe'
     brave_path = r"C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe"
 
@@ -16,25 +15,20 @@ try:
     options.binary_location = brave_path
     service = Service(driver_path)
 
-    # Initialiser le navigateur avec les options et driver
     driver = webdriver.Chrome(service=service, options=options)
 
-    # Désactiver les animations pour accélérer le processus
     driver.execute_script("""
         const style = document.createElement('style');
         style.innerHTML = '*, *::before, *::after { transition: none !important; animation: none !important; }';
         document.head.appendChild(style);
     """)
 
-    # Étape 1 : Accéder à la page
     driver.get("https://tldb.info/auction-house")
 
-    # Attendre la présence de la pagination pour confirmer que la page a bien chargé
     WebDriverWait(driver, 10).until(
         EC.presence_of_element_located((By.CSS_SELECTOR, 'aside.dt-pagination-rowcount'))
     )
     
-    # Étape 2 : Ouvrir le premier menu dropdown et cliquer sur "All"
     driver.execute_script(""" 
         const dropdownButtons = document.querySelectorAll('.btn.btn-secondary.w-100.fw-semi-bold.dropdown-toggle');
         if (dropdownButtons.length > 0) {
@@ -51,7 +45,6 @@ try:
         if (allButton) allButton.click(); // Clic sur le bouton "All"
     """)
 
-    # Étape 3 : Ouvrir le deuxième menu dropdown et cliquer sur le deuxième "Europe"
     driver.execute_script(""" 
         const dropdownButtons = document.querySelectorAll('.btn.btn-secondary.w-100.fw-semi-bold.dropdown-toggle');
         if (dropdownButtons.length > 1) {
@@ -68,7 +61,6 @@ try:
         if (europeButtons.length >= 2) europeButtons[1].click(); // Clic sur le deuxième bouton "Europe"
     """)
 
-    # Étape 4 : Récupérer le nombre total d'entrées à partir de la pagination
     pagination_text = driver.execute_script("""
         const paginationElement = document.querySelector('aside.dt-pagination-rowcount');
         if (paginationElement) {
@@ -78,13 +70,12 @@ try:
         }
     """)
 
-    # Utiliser une expression régulière pour extraire le nombre total d'entrées après 'of'
     total_entries = 0
     if pagination_text:
         try:
             match = re.search(r'of (\d+) entries', pagination_text)
             if match:
-                total_entries = int(match.group(1))  # Extraire le nombre après 'of'
+                total_entries = int(match.group(1))
                 print(f"Nombre total d'entrées : {total_entries}")
             else:
                 print("Aucun nombre d'entrées trouvé dans le texte de pagination.")
@@ -93,8 +84,7 @@ try:
     else:
         print("Impossible de récupérer le texte de pagination.")
 
-    # Étape 5 : Cliquer sur tous les éléments du tableau
-    for index in range(total_entries):  # Itération basée sur le nombre total d'entrées
+    for index in range(total_entries):
         driver.execute_script(f"""
             const tableRows = document.querySelectorAll('tbody.align-middle > tr');
             if (tableRows.length > {index}) {{
@@ -110,7 +100,6 @@ try:
             }}
         """)
 
-        # Attente du bouton "Go Back" avant de cliquer dessus
         WebDriverWait(driver, 10).until(
             EC.element_to_be_clickable((By.CSS_SELECTOR, '.btn.btn-secondary.fw-semi-bold.d-flex.align-items-center.gap-1.svelte-o8inv0'))
         )

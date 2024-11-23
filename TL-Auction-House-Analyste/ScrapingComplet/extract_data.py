@@ -5,11 +5,9 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
-
-import re  # Importation du module pour utiliser les expressions régulières
+import re 
 
 try:
-    # Configuration de Selenium avec le navigateur Brave
     driver_path = r'E:\ProgramationPerso\Drivers\chromedriver-win64\chromedriver.exe'
     brave_path = r"C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe"
 
@@ -17,14 +15,11 @@ try:
     options.binary_location = brave_path
     service = Service(driver_path)
 
-    # Initialiser le navigateur avec les options et driver
     driver = webdriver.Chrome(service=service, options=options)
 
-    # Étape 1 : Accéder à la page
     driver.get("https://tldb.info/auction-house")
-    time.sleep(3)  # Attendre que la page se charge
+    time.sleep(3)
 
-    # Étape 2 : Ouvrir le premier menu dropdown et cliquer sur "All"
     driver.execute_script(""" 
         const dropdownButtons = document.querySelectorAll('.btn.btn-secondary.w-100.fw-semi-bold.dropdown-toggle');
         if (dropdownButtons.length > 0) {
@@ -37,9 +32,8 @@ try:
             }, 500); // Délai pour permettre au menu de s'afficher
         }
     """)
-    time.sleep(2)  # Attendre que l'action soit effectuée
+    time.sleep(2)
 
-    # Étape 3 : Ouvrir le deuxième menu dropdown et cliquer sur le deuxième "Europe"
     driver.execute_script(""" 
         const dropdownButtons = document.querySelectorAll('.btn.btn-secondary.w-100.fw-semi-bold.dropdown-toggle');
         if (dropdownButtons.length > 1) {
@@ -52,9 +46,8 @@ try:
             }, 500); // Délai pour permettre au menu de s'afficher
         }
     """)
-    time.sleep(2)  # Attendre que l'action soit effectuée
+    time.sleep(2)
 
-    # Étape 4 : Récupérer le nombre total d'entrées à partir de la pagination
     pagination_text = driver.execute_script("""
         const paginationElement = document.querySelector('aside.dt-pagination-rowcount');
         if (paginationElement) {
@@ -64,14 +57,12 @@ try:
         }
     """)
 
-    # Utiliser une expression régulière pour extraire le nombre total d'entrées après 'of'
     total_entries = 0
     if pagination_text:
         try:
-            # Rechercher le nombre après 'of'
             match = re.search(r'of (\d+) entries', pagination_text)
             if match:
-                total_entries = int(match.group(1))  # Extraire le nombre après 'of'
+                total_entries = int(match.group(1))
                 print(f"Nombre total d'entrées : {total_entries}")
             else:
                 print("Aucun nombre d'entrées trouvé dans le texte de pagination.")
@@ -85,9 +76,7 @@ try:
 
     print(f"Nombre total d'entrées : {total_entries}")
     
-    # Étape 5 : Cliquer sur tous les éléments du tableau
-    for index in range(total_entries):  # Itération basée sur le nombre total d'entrées
-        # Étape 5.1 : Trouver et cliquer sur le nom de l'objet dans la ligne du tableau
+    for index in range(total_entries):
         driver.execute_script(f"""
             const tableRows = document.querySelectorAll('tbody.align-middle > tr');
             if (tableRows.length > {index}) {{
@@ -102,11 +91,10 @@ try:
                 console.error("Ligne {index} introuvable.");
             }}
         """)
-        #time.sleep(1)  # Attendre 1 seconde
+        #time.sleep(1)
         WebDriverWait(driver, 10).until(
             EC.element_to_be_clickable((By.CSS_SELECTOR, '.btn.btn-secondary.fw-semi-bold.d-flex.align-items-center.gap-1.svelte-o8inv0'))
         )
-        # Étape 5.2 : Cliquer sur le bouton "Go Back"
         driver.execute_script("""
             const goBackButton = document.querySelector('.btn.btn-secondary.fw-semi-bold.d-flex.align-items-center.gap-1.svelte-o8inv0');
             if (goBackButton) {
@@ -115,7 +103,7 @@ try:
                 console.error("Bouton 'Go Back' introuvable.");
             }
         """)
-        time.sleep(2)  # Attendre que la page du tableau se recharge
+        time.sleep(2)
 
     print("Tout le contenu du tableau a bien été extrait.")
 except Exception as e:
