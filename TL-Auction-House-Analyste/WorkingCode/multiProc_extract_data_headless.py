@@ -12,29 +12,66 @@ from bs4 import BeautifulSoup
 from prettytable import PrettyTable
 from datetime import datetime
 
-def clean_string(s):
+def clean_string(s: str) -> str:
+    """
+    Nettoyer une chaine de caracteres en supprimant les espaces inutiles et en remplaçant les caracteres de saut de ligne et de tabulation par des espaces.
+
+    Args:
+        s (str): Chaine de caracteres a nettoyer
+
+    Returns:
+        str: Chaine de caracteres nettoyee
+    """
     if s:
         return re.sub(r'\s+', ' ', s.strip().replace("\n", " ").replace("\t", " ").replace("\r", ""))
     return s
 
-def clean_and_convert_to_number(value):
+def clean_and_convert_to_number(value: str) -> Union[int, float]:
+    """
+    Convertir une valeur brute en un nombre (int ou float) si possible.
+
+    Args:
+        value (str): Valeur brute
+
+    Returns:
+        Union[int, float]: Nombre converti ou 0 si la conversion a echoue
+    """
+    # Supprimer les espaces inutiles
+    value = value.strip()
+
+    # Supprimer les virgules si presentes
+    if "," in value:
+        value = value.replace(",", "")
+
     try:
-        value = value.strip()
-        if "," in value:
-            value = value.replace(",", "")
+        # Tenter de convertir en nombre
         number = float(value)
+        # Si c'est un entier, le renvoyer tel quel
         if number.is_integer():
             return int(number)
+        # Sinon, le renvoyer comme float
         return number
     except ValueError:
+        # Si la conversion a echoue, afficher un message d'erreur
         print(f"Failed to convert '{value}' to a number")
+        # Et renvoyer 0
         return 0
 
+
 def check_trait_column_in_html(table_html):
+    """
+    Verifier si une colonne nommee "Trait" est presente dans le tableau HTML fourni.
+
+    Args:
+        table_html (str): HTML du tableau
+
+    Returns:
+        bool: True si la colonne "Trait" est presente, False sinon
+    """
     if table_html:
         soup = BeautifulSoup(table_html, "html.parser")
         thead = soup.find("thead")
-        #print("TH trouver\n")
+        # Recherche de la colonne "Trait" dans le thead
         if thead:
             for th in thead.find_all("th"):
                 if 'Trait' in th.get_text(strip=True):
@@ -42,69 +79,125 @@ def check_trait_column_in_html(table_html):
                     return True
     return False
 
+
 def nettoyer_et_simplifier_html(contenu_html):
+    """
+    Nettoie et simplifie le contenu HTML fourni en supprimant les balises et attributs inutiles.
+
+    Args:
+        contenu_html (str): Le contenu HTML brut à nettoyer.
+
+    Returns:
+        str: Le contenu HTML nettoyé et simplifié.
+    """
     try:
+        # Parse le contenu HTML avec BeautifulSoup
         soup = BeautifulSoup(contenu_html, "html.parser")
+        # Trouver le premier <tbody> avec la classe 'align-middle'
         tbody = soup.find("tbody", class_="align-middle")
 
         if not tbody:
             print("Aucun <tbody> avec la classe 'align-middle' trouvé.")
             return str(soup)
 
+        # Supprimer les balises inutiles ou vides
         for tag in tbody.find_all(["span", "div", "svg", "img", "a", "path"]):
             if not tag.get_text(strip=True):
                 tag.decompose()
 
+        # Supprimer les lignes de tableau (tr) vides
         for ligne in tbody.find_all("tr"):
             cellules = ligne.find_all("td")
             if all(not cellule.get_text(strip=True) for cellule in cellules):
                 ligne.decompose()
 
+        # Supprimer les attributs inutiles des balises restantes
         for tag in tbody.find_all(True):
             tag.attrs = {key: value for key, value in tag.attrs.items() if key not in ["class", "style"]}
 
         return str(tbody)
-    
+
     except Exception as e:
         print(f"Erreur lors du traitement : {e}")
         return contenu_html
 
 def creer_fichier(contenu, nom_fichier):
+    """
+    Crée un fichier avec le contenu fourni.
+
+    Args:
+        contenu (str): Le contenu du fichier.
+        nom_fichier (str): Le nom du fichier à créer.
+
+    Raises:
+        Exception: Si une erreur se produit lors de la création du fichier.
+    """
     try:
+        # Ouvrir le fichier en mode écriture (w) avec encodage UTF-8
         with open(nom_fichier, 'w', encoding='utf-8') as fichier:
+            # Écrire le contenu dans le fichier
             fichier.write(contenu)
+        # Afficher un message de confirmation
         print(f"Le fichier '{nom_fichier}' a été créé avec succès.")
     except Exception as e:
+        # Afficher un message d'erreur si une erreur se produit
         print(f"Une erreur s'est produite lors de la création du fichier : {e}")
 
-def clean_text(text):
-    return text.replace("→", "")
 
-def print_pretty_data(data): # Fonction pour afficher les données extraites dans un joli tableau
+def print_pretty_data(data):
+    """
+    Fonction pour afficher les données extraites dans un joli tableau.
+
+    Args:
+        data (list): La liste de données à afficher.
+
+    Returns:
+        None
+    """
+    # Instancier un objet PrettyTable
     table = PrettyTable()
+    # Définir les en-têtes du tableau
     table.field_names = ["Name", "Trait", "Price", "Quantity"]
 
+    # Parcourir la liste de données et ajouter chaque élément au tableau
     for item in data:
         for row in item:
+            # Ajouter une ligne au tableau avec les valeurs de l'élément
             table.add_row([row["Name"], row["Trait"], row["Price"], row["Quantity"]])
 
+    # Afficher le tableau
     print(table)
 
 def save_to_csv(data, filename="extracted_data.csv"):
-    headers = ["Name", "Trait", "Price", "Quantity"]  # Définir les en-têtes du CSV
+    """
+    Fonction pour sauvegarder les données dans un fichier CSV.
 
+    Args:
+        data (list): La liste de données à sauvegarder.
+        filename (str): Le nom du fichier CSV à créer (par défaut : "extracted_data.csv").
+    """
+    # Définir les en-têtes du CSV
+    headers = ["Name", "Trait", "Price", "Quantity"]
+
+    # Ouvrir le fichier en mode écriture (w) avec encodage UTF-8
     with open(filename, mode="w", newline="", encoding="utf-8") as file:
+        # Instancier un objet DictWriter
         writer = csv.DictWriter(file, fieldnames=headers)
+        # Écrire l'en-tête
         writer.writeheader()
 
+        # Parcourir la liste de données et écrire chaque élément dans le fichier
         for item in data:
             for row in item:
-                row["Name"] = clean_text(row["Name"])
-                row["Trait"] = clean_text(row["Trait"])
-                row["Price"] = clean_text(str(row["Price"]))
-                row["Quantity"] = clean_text(str(row["Quantity"]))
+                # Convertir les valeurs en strings
+                row["Name"] = str(row["Name"])
+                row["Trait"] = str(row["Trait"])
+                row["Price"] = str(row["Price"])
+                row["Quantity"] = str(row["Quantity"])
+                # Écrire la ligne dans le fichier
                 writer.writerow(row)
 
+    # Afficher un message de confirmation
     print(f"Les données ont été sauvegardées dans le fichier {filename}")
 
 
@@ -269,8 +362,13 @@ def run_selenium_instance(start_index, end_index): # Fonction pour exécuter une
     finally:
         driver.quit()
 
-def get_total_entries(): # Fonction pour récupérer dynamiquement `total_entries`
-    driver = webdriver.Chrome() #! Ajoute le mode headless
+def get_total_entries():
+    """Fonction pour récupérer dynamiquement le nombre de lignes (total_entries) de la page d'accueil de l'Auction House.
+
+    Returns:
+        int: Nombre de lignes (total_entries) de la page d'accueil de l'Auction House.
+    """
+    driver = webdriver.Chrome()  #! Ajoute le mode headless
     driver.get("https://tldb.info/auction-house")
 
     WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, 'aside.dt-pagination-rowcount')))
