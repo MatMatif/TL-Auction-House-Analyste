@@ -291,7 +291,7 @@ def get_total_entries(): # Fonction pour récupérer dynamiquement `total_entrie
 def main(): # Fonction principale pour diviser le travail et lancer les instances en parallèle
     total_entries = get_total_entries()
 
-    num_instances = 6
+    num_instances = 16
     entries_per_instance = total_entries // num_instances
 
     index_ranges = [(i * entries_per_instance, (i + 1) * entries_per_instance) for i in range(num_instances)]
