@@ -26,7 +26,7 @@ def clean_string(s: str) -> str:
         return re.sub(r'\s+', ' ', s.strip().replace("\n", " ").replace("\t", " ").replace("\r", ""))
     return s
 
-def clean_and_convert_to_number(value: str) -> Union[int, float]:
+def clean_and_convert_to_number(value):
     """
     Convertir une valeur brute en un nombre (int ou float) si possible.
 
@@ -200,8 +200,7 @@ def save_to_csv(data, filename="extracted_data.csv"):
     # Afficher un message de confirmation
     print(f"Les données ont été sauvegardées dans le fichier {filename}")
 
-
-def run_selenium_instance(start_index, end_index): # Fonction pour exécuter une instance de Selenium
+def initialise_driver():
     # Définir les chemins pour les drivers
     driver_path = r'E:\ProgramationPerso\Drivers\chromedriver-win64\chromedriver.exe'
     brave_path = r"C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe"
@@ -218,6 +217,10 @@ def run_selenium_instance(start_index, end_index): # Fonction pour exécuter une
 
     service = Service(driver_path)
     driver = webdriver.Chrome(service=service, options=options)
+
+def run_selenium_instance(start_index, end_index): # Fonction pour exécuter une instance de Selenium
+
+    driver = initialise_driver()
 
     try:
         driver.get("https://tldb.info/auction-house")
