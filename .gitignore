@@ -6,6 +6,8 @@ __pycache__/
 #perso
 *.csv
 *.parquet
+TL-Auction-House-Analyste/JsonTraitement/data/**/*.json
+#*.json
 #perso
 
 # C extensions

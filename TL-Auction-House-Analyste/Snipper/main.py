@@ -39,7 +39,7 @@ class DataFetcher(QThread):
 
 
 class DataProcessor:
-    def process_data(self, data, data_name, percentage_threshold, cost_threshold, depth, mini_profit=10):
+    def process_data(self, data, data_name, percentage_threshold, cost_threshold, depth, mini_profit=30):
         brute_results = []
 
 
@@ -131,7 +131,7 @@ class DataProcessor:
         filtered_results = [result for result in brute_results if
                             result['Profitability (%)'] >= percentage_threshold and result['Cost'] <= cost_threshold and
                             result[
-                                'Instant Profit'] > 4]
+                                'Instant Profit'] > mini_profit]
         filtered_results.sort(key=lambda x: x['Instant Profit'], reverse=True)
         return filtered_results
 
