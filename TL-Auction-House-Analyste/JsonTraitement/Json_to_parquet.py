@@ -4,38 +4,41 @@ import pandas as pd
 import json
 
 # Fonction pour charger et traiter le fichier JSON
-def process_json_to_parquet(input_file, output_file):
+def process_json_to_parquet(input_data_file, input_price_file, output_file):
     # Charger le fichier JSON
-    with open(input_file, 'r') as f:
-        data = json.load(f)
+    with open(input_price_file, 'r') as f, open(input_data_file, 'r') as y:
+        price = json.load(f)
+        data = json.load(y)
     
     # Accéder aux données de la liste
-    list_data = data['list']
-
+    list_price = price['list']
+    list_data = data['items']
     # Créer une liste pour stocker les lignes de données
     records = []
+    item_data = {item['num']: item['name'] for item in list_data if item['num'] and item['name']}
 
+    print(item_data)
     # Extraire les données
 
-    for server_id, items in list_data.items():
-        print(server_id)
-        for item_id, item_data in items.items():
-            quantity = item_data['quantity']
-            print(quantity)
-            sales = item_data['sales']
+    for server_id, items in list_price.items():
+        #print(server_id)
+        for item_id, item_price in items.items():
+            quantity = item_price['quantity']
+            #print(quantity)
+            sales = item_price['sales']
             for sale in sales:
-                item_trait = sale.get('t', None)
+                item_trait = sale.get('t', np.nan)
 
-                if item_trait is None:
-                    item_trait = np.nan
-
+                item_num = int(item_id)
+                item_name = item_data.get(item_num, "Unknown")
                 records.append({
-                    'server_id': server_id,
-                    'item_id': item_id,
-                    'quantity_on_market': quantity,
-                    'sale_quantity': sale['c'],
-                    'sale_price': sale['p'],
-                    'item_trait': item_trait
+                    's_id': server_id,
+                    #'item_id': item_id,
+                    'i_name': item_name,
+                    #'quantity_on_market': quantity,
+                    's_q': sale['c'],
+                    's_p': sale['p'],
+                    'i_t': item_trait
                 })
 
     # Convertir en DataFrame Pandas
@@ -47,7 +50,8 @@ def process_json_to_parquet(input_file, output_file):
     print(f"Le fichier Parquet a été créé avec succès : {output_file}")
 
 # Exemple d'appel de la fonction avec un fichier JSON en entrée et un fichier Parquet en sortie
-input_file = 'data.json'  # Chemin vers votre fichier JSON d'entrée
-output_file = 'sales_data.parquet'  # Nom du fichier Parquet de sortie
+input_price_file = 'data/item_prices/item_prices_data_2024-11-24T17_52_03.878Z.json'  # Chemin vers votre fichier JSON d'entrée
+input_data_file = 'data/auction_house/auction_house_data_2024-11-24T17_54_01.994Z.json'
+output_file = 'sales_price.parquet'  # Nom du fichier Parquet de sortie
 
-process_json_to_parquet(input_file, output_file)
+process_json_to_parquet(input_data_file, input_price_file, output_file)
