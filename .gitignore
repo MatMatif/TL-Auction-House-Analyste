@@ -4,6 +4,7 @@ __pycache__/
 *$py.class
 
 #perso
+*.png
 *.csv
 *.parquet
 TL-Auction-House-Analyste/JsonTraitement/data/**/*.json
