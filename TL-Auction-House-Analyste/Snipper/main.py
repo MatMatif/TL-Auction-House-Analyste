@@ -1,7 +1,9 @@
 import json
+import threading
+
 import requests
 import time
-import numpy as np
+import pyperclip
 from compress_json import decompress
 import hashlib
 import sys
@@ -26,7 +28,7 @@ class DataFetcher(QThread):
         url = "https://tldb.info/api/ah/prices"
         try:
             response = requests.get(url, headers=headers)
-            response.raise_for_status() # Raise HTTPError for bad responses (4xx or 5xx)
+            response.raise_for_status()  # Raise HTTPError for bad responses (4xx or 5xx)
             data = response.json()
             list_data = data["list"]
             fetched_data = decompress(json.loads(list_data[self.server]))
@@ -35,13 +37,13 @@ class DataFetcher(QThread):
             self.data_ready.emit(fetched_data, latency)
         except requests.exceptions.RequestException as e:
             print(f"Error fetching data: {e}")
-            self.data_ready.emit(None, 0) # Emit None to signal error
+            self.data_ready.emit(None, 0)  # Emit None to signal error
 
 
 class DataProcessor:
-    def process_data(self, data, data_name, percentage_threshold, cost_threshold, depth, mini_profit=30):
-        brute_results = []
+    def process_data(self, data, data_name, percentage_threshold, cost_threshold, depth, mini_profit):
 
+        brute_results = []
 
         grouped_data = []
         # Parcours des items
@@ -70,7 +72,7 @@ class DataProcessor:
                 grouped_data.append((item_id, "NULL", sales))
 
         for name, trait, rows in grouped_data:
-            if len(rows) < 5:  # Si moins de 15 items, on ignore ce groupe
+            if len(rows) < 5:
                 continue
                 # Trier les prix par ordre croissant
             rows.sort(key=lambda x: x['p'])  # Tri par prix croissant
@@ -85,6 +87,7 @@ class DataProcessor:
 
                 # Calcul du coût total pour cette profondeur (coût des `depth_incr` premiers items)
                 total_cost = 0
+
                 if depth_incr != 0:
                     for p, c in prices[:depth_incr]:
                         total_cost += p * c
@@ -114,6 +117,12 @@ class DataProcessor:
                     if trait != "NULL":
                         temp_trait = data_name['traits'][trait]['name']
 
+                    sale_price = -1
+                    try:
+                        sale_price = prices[depth_incr + 1][0]
+                    except IndexError:
+                        pass
+
                     brute_results.append({
                         'Name': temp_name,
                         'Trait': temp_trait,
@@ -124,14 +133,13 @@ class DataProcessor:
                         'Item Price': prices[depth_incr][0],
                         # Prix de l'item étudié (celui sur lequel on base la rentabilité)
                         'Occurrences': len(rows),
-                        'Sale Price': prices[depth_incr + 1][0]  # Prix de vente théorique (prix de l'item suivant)
+                        'Sale Price': sale_price  # Prix de vente théorique (prix de l'item suivant)
                     })
 
         # Optimisation: Filtrage avec une liste de compréhension et conditions combinées
         filtered_results = [result for result in brute_results if
                             result['Profitability (%)'] >= percentage_threshold and result['Cost'] <= cost_threshold and
-                            result[
-                                'Instant Profit'] > mini_profit]
+                            result['Instant Profit'] >= mini_profit]
         filtered_results.sort(key=lambda x: x['Instant Profit'], reverse=True)
         return filtered_results
 
@@ -153,6 +161,7 @@ class MainWindow(QWidget):
         self.server = "30001"
         self.initUI()
         self.data_name = self.load_data_name("auction_house_data.json")
+        self.previous_result = []
         self.start_refresh()
 
     def load_data_name(self, filename):
@@ -163,15 +172,14 @@ class MainWindow(QWidget):
             print(f"Error: File '{filename}' not found.")
             return {}
 
-
     def initUI(self):
         grid = QGridLayout()
 
         # Input fields
         grid.addWidget(QLabel("Profit minimum"), 0, 0)
-        self.percentage_edit = QLineEdit(str(self.mini_profit))
-        self.percentage_edit.textChanged.connect(self.update_thresholds)
-        grid.addWidget(self.percentage_edit, 0, 1)
+        self.profit_edit = QLineEdit(str(self.mini_profit))
+        self.profit_edit.textChanged.connect(self.update_thresholds)
+        grid.addWidget(self.profit_edit, 0, 1)
 
         grid.addWidget(QLabel("Seuil de Coût"), 1, 0)
         self.cost_edit = QLineEdit(str(self.cost_threshold))
@@ -188,70 +196,78 @@ class MainWindow(QWidget):
 
         # Tree Widget
         self.tree = QTreeWidget()
-        self.tree.setHeaderLabels(["Name", "Trait", "Depth", "Cost", "Instant Profit", "Profitability (%)", "Item Price", "Occurrences", "Sale Price"])
+        self.tree.setHeaderLabels(
+            ["Name", "Trait", "Depth", "Cost", "Instant Profit", "Profitability (%)", "Item Price", "Occurrences",
+             "Sale Price"])
         self.tree.header().setSectionResizeMode(QHeaderView.ResizeToContents)
         self.tree.itemClicked.connect(self.on_item_clicked)
         grid.addWidget(self.tree, 4, 0, 1, 2)
 
         self.setLayout(grid)
 
-
-
     def update_thresholds(self):
         try:
-            self.percentage_threshold = int(self.percentage_edit.text())
+            self.mini_profit = int(self.profit_edit.text())
             self.cost_threshold = int(self.cost_edit.text())
             self.depth = int(self.depth_edit.text())
         except ValueError:
             pass  # Ignore invalid input
-
 
     def start_refresh(self):
         self.fetcher = DataFetcher(self.server)
         self.fetcher.data_ready.connect(self.update_gui)
         self.fetcher.start()
 
-
     def update_gui(self, data, latency):
         if data is None:
-          self.latency_label.setText(f"Latence: Erreur lors de la récupération des données")
-          return
+            self.latency_label.setText(f"Latence: Erreur lors de la récupération des données")
+            return
 
-        results = self.data_processor.process_data(data, self.data_name, self.percentage_threshold, self.cost_threshold, self.depth, self.mini_profit)
         self.latency_label.setText(f"Latence: {latency:.4f} secondes")
-        self.tree.clear()
-        for result in results:
-            item = QTreeWidgetItem(self.tree)
-            item.setText(0, result['Name'])
-            item.setText(1, result['Trait'])
-            item.setText(2, str(result['Depth']))
-            item.setText(3, str(result['Cost']))
-            item.setText(4, str(result['Instant Profit']))
-            item.setText(5, str(result['Profitability (%)']))
-            item.setText(6, str(result['Item Price']))
-            item.setText(7, str(result['Occurrences']))
-            item.setText(8, str(result['Sale Price']))
-            profitability = min(result['Instant Profit'], 1000)
-            color = self.get_color(profitability)
-            item.setBackground(0, QColor(color))
 
-            for i in range(self.tree.columnCount()):
-                item.setBackground(i, self.get_color(profitability))
+        def process_and_update_tree():
+            results = self.data_processor.process_data(data, self.data_name, self.percentage_threshold,
+                                                       self.cost_threshold, self.depth, self.mini_profit)
 
-        self.start_refresh() #restart the fetcher
+            if results and self.previous_result != results:
+                pyperclip.copy(results[0]['Name'])
+                
+                self.tree.clear()  # Effacer l'arbre avant d'ajouter de nouveaux éléments
 
-    def get_color(self, profitability):
-        profitability = min(profitability, 1000)  # Cap at 1000
+                for result in results:
+                    item = QTreeWidgetItem(self.tree)
+                    item.setText(0, result['Name'])
+                    item.setText(1, result['Trait'])
+                    item.setText(2, str(result['Depth']))
+                    item.setText(3, str(result['Cost']))
+                    item.setText(4, str(result['Instant Profit']))
+                    item.setText(5, str(result['Profitability (%)']))
+                    item.setText(6, str(result['Item Price']))
+                    item.setText(7, str(result['Occurrences']))
+                    item.setText(8, str(result['Sale Price']))
+                    min_profit = min(result['Instant Profit'], 1000)
+                    color = self.get_color(min_profit)
 
-        if profitability <= 100:
+                    for i in range(self.tree.columnCount()):
+                        item.setBackground(i, color)  # Appliquer la couleur directement
+
+            self.previous_result = results
+            self.start_refresh()
+
+        threading.Thread(target=process_and_update_tree).start()
+
+    def get_color(self, min_profit):
+        min_profit = min(min_profit, 1000)  # Cap at 1000
+
+        if min_profit <= 100:
             # Linear interpolation from (50, 255, 50) to (255, 255, 50)
-            normalized_p = profitability / 100.0
+            normalized_p = min_profit / 100.0
             r = int(50 + (255 - 50) * normalized_p)
             g = 255
             b = 50
         else:
             # Linear interpolation from (255, 255, 50) to (255, 50, 50)
-            normalized_p = (profitability - 100) / 900.0  # Normalize to 0-1 range for 100-1000
+            normalized_p = (min_profit - 100) / 900.0  # Normalize to 0-1 range for 100-1000
             r = 255
             g = int(255 - (255 - 50) * normalized_p)
             b = 50
@@ -267,5 +283,6 @@ class MainWindow(QWidget):
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     window = MainWindow()
+    window.resize(800, 600)
     window.show()
     sys.exit(app.exec_())
