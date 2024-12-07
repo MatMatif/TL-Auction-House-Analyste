@@ -2809,6 +2809,186 @@
       "sales": []
     },
     {
+      "id": "spear_aa_t1_normal_000",
+      "num": 1729488377,
+      "name": "Heroic Polearm of the Resistance",
+      "rarity": 5,
+      "icon": "Image/Icon/Item_128/Equip/Weapon/IT_P_Spear_00015",
+      "quantity": 0,
+      "price": 0,
+      "traits": [
+        1670377923,
+        1670377924,
+        1670377925,
+        1670377865,
+        1670377857,
+        1670377858
+      ],
+      "sales": []
+    },
+    {
+      "id": "spear_aa_t1_normal_001",
+      "num": 1729488343,
+      "name": "Skull Severing Spear",
+      "rarity": 5,
+      "icon": "Image/Icon/Item_128/Equip/Weapon/IT_P_Spear_00019",
+      "quantity": 0,
+      "price": 0,
+      "traits": [
+        1670377923,
+        1670377924,
+        1670377925,
+        1670377868,
+        1670377859,
+        1670377882
+      ],
+      "sales": []
+    },
+    {
+      "id": "spear_aa_t1_normal_002",
+      "num": 1729488344,
+      "name": "Junobote's Smoldering Ranseur",
+      "rarity": 5,
+      "icon": "Image/Icon/Item_128/Equip/Weapon/IT_P_Spear_00021",
+      "quantity": 0,
+      "price": 0,
+      "traits": [
+        1670377923,
+        1670377924,
+        1670377925,
+        1670377866,
+        1670377859,
+        1670377860
+      ],
+      "sales": []
+    },
+    {
+      "id": "spear_aa_t1_normal_003",
+      "num": 1729488345,
+      "name": "Shaikal's Mindveil Harpoon",
+      "rarity": 5,
+      "icon": "Image/Icon/Item_128/Equip/Weapon/IT_P_Spear_00016",
+      "quantity": 0,
+      "price": 0,
+      "traits": [
+        1670377923,
+        1670377924,
+        1670377925,
+        1670377868,
+        1670377860,
+        1670377920
+      ],
+      "sales": []
+    },
+    {
+      "id": "spear_aa_t1_arch_004",
+      "num": 1729488346,
+      "name": "Queen Bellandir's Serrated Spike",
+      "rarity": 5,
+      "icon": "Image/Icon/Item_128/Equip/Weapon/IT_P_Spear_00018",
+      "quantity": 0,
+      "price": 0,
+      "traits": [
+        1670377923,
+        1670377924,
+        1670377925,
+        1670377882,
+        1670377857,
+        1670377897
+      ],
+      "sales": []
+    },
+    {
+      "id": "head_leather_aa_t1_set_005",
+      "num": 1731377015,
+      "name": "Gilded Raven Mask",
+      "rarity": 5,
+      "icon": "Image/Icon/Item_128/Equip/Armor/P_Set_LE_M_HM_00012A",
+      "quantity": 0,
+      "price": 0,
+      "traits": [
+        1670377913,
+        1670377914,
+        1670377916,
+        1670377917,
+        1670377860,
+        1670377920
+      ],
+      "sales": []
+    },
+    {
+      "id": "chest_leather_aa_t1_set_005",
+      "num": 1731377016,
+      "name": "Gilded Raven Tunic",
+      "rarity": 5,
+      "icon": "Image/Icon/Item_128/Equip/Armor/P_Part_LE_M_TS_00014A",
+      "quantity": 0,
+      "price": 0,
+      "traits": [
+        1670377913,
+        1670377914,
+        1670377916,
+        1670377917,
+        1670377857,
+        1670377897
+      ],
+      "sales": []
+    },
+    {
+      "id": "hands_leather_aa_t1_set_005",
+      "num": 1731377017,
+      "name": "Gilded Raven Grips",
+      "rarity": 5,
+      "icon": "Image/Icon/Item_128/Equip/Armor/P_Set_LE_M_GL_00022B",
+      "quantity": 0,
+      "price": 0,
+      "traits": [
+        1670377913,
+        1670377914,
+        1670377916,
+        1670377917,
+        1670377857,
+        1670377919
+      ],
+      "sales": []
+    },
+    {
+      "id": "legs_leather_aa_t1_set_005",
+      "num": 1731377018,
+      "name": "Gilded Raven Trousers",
+      "rarity": 5,
+      "icon": "Image/Icon/Item_128/Equip/Armor/P_Set_LE_M_PT_00022B",
+      "quantity": 0,
+      "price": 0,
+      "traits": [
+        1670377913,
+        1670377914,
+        1670377916,
+        1670377917,
+        1670377857,
+        1670377898
+      ],
+      "sales": []
+    },
+    {
+      "id": "feet_leather_aa_t1_set_005",
+      "num": 1731377019,
+      "name": "Gilded Raven Boots",
+      "rarity": 5,
+      "icon": "Image/Icon/Item_128/Equip/Armor/P_Set_LE_M_BT_00022A",
+      "quantity": 0,
+      "price": 0,
+      "traits": [
+        1670377913,
+        1670377914,
+        1670377916,
+        1670377917,
+        1670377860,
+        1670377921
+      ],
+      "sales": []
+    },
+    {
       "id": "material_giantwarrior_04",
       "num": 1673955797,
       "name": "Tevent's Soul Fragment",
@@ -4263,7 +4443,7 @@
     {
       "id": "belt_a_t2_addoption_005_blueprint",
       "num": 1697079009,
-      "name": "Precious Lithograph: Forbidden Liberation Chain",
+      "name": "Precious Lithograph: Forbidden Sacred Chain",
       "rarity": 5,
       "icon": "Image/Icon/Item_BluePrint/Equip/Acc/IT_P_Belt_00015_blueprint",
       "quantity": 0,
@@ -7267,7 +7447,7 @@
     {
       "id": "belt_a_t2_addoption_005_traitextract",
       "num": 1692229015,
-      "name": "Extract: Forbidden Liberation Chain",
+      "name": "Extract: Forbidden Sacred Chain",
       "rarity": 5,
       "icon": "Image/Icon/Item_128/Equip/Acc/IT_P_Belt_00015",
       "quantity": 0,
@@ -7463,6 +7643,151 @@
       "sales": []
     },
     {
+      "id": "spear_aa_t1_normal_000_blueprint",
+      "num": 1729488378,
+      "name": "Precious Lithograph: Heroic Polearm of the Resistance",
+      "rarity": 5,
+      "icon": "Image/Icon/Item_BluePrint/Equip/Weapon/IT_P_Spear_00015_blueprint",
+      "quantity": 0,
+      "price": 0,
+      "traits": [],
+      "sales": []
+    },
+    {
+      "id": "spear_aa_t1_normal_001_blueprint",
+      "num": 1729488355,
+      "name": "Precious Lithograph: Skull Severing Spear",
+      "rarity": 5,
+      "icon": "Image/Icon/Item_BluePrint/Equip/Weapon/IT_P_Spear_00019_blueprint",
+      "quantity": 0,
+      "price": 0,
+      "traits": [],
+      "sales": []
+    },
+    {
+      "id": "spear_aa_t1_normal_002_blueprint",
+      "num": 1729488356,
+      "name": "Precious Lithograph: Junobote's Smoldering Ranseur",
+      "rarity": 5,
+      "icon": "Image/Icon/Item_BluePrint/Equip/Weapon/IT_P_Spear_00021_blueprint",
+      "quantity": 0,
+      "price": 0,
+      "traits": [],
+      "sales": []
+    },
+    {
+      "id": "spear_aa_t1_normal_003_blueprint",
+      "num": 1729488357,
+      "name": "Precious Lithograph: Shaikal's Mindveil Harpoon",
+      "rarity": 5,
+      "icon": "Image/Icon/Item_BluePrint/Equip/Weapon/IT_P_Spear_00016_blueprint",
+      "quantity": 0,
+      "price": 0,
+      "traits": [],
+      "sales": []
+    },
+    {
+      "id": "spear_aa_t1_arch_004_blueprint",
+      "num": 1729488358,
+      "name": "Precious Lithograph: Queen Bellandir's Serrated Spike",
+      "rarity": 5,
+      "icon": "Image/Icon/Item_BluePrint/Equip/Weapon/IT_P_Spear_00018_blueprint",
+      "quantity": 0,
+      "price": 0,
+      "traits": [],
+      "sales": []
+    },
+    {
+      "id": "spear_aa_t1_normal_000_traitextract",
+      "num": 1729488379,
+      "name": "Extract: Heroic Polearm of the Resistance",
+      "rarity": 5,
+      "icon": "Image/Icon/Item_128/Equip/Weapon/IT_P_Spear_00015",
+      "quantity": 0,
+      "price": 0,
+      "traits": [
+        1670377923,
+        1670377924,
+        1670377925,
+        1670377865,
+        1670377857,
+        1670377858
+      ],
+      "sales": []
+    },
+    {
+      "id": "spear_aa_t1_normal_001_traitextract",
+      "num": 1729488368,
+      "name": "Extract: Skull Severing Spear",
+      "rarity": 5,
+      "icon": "Image/Icon/Item_128/Equip/Weapon/IT_P_Spear_00019",
+      "quantity": 0,
+      "price": 0,
+      "traits": [
+        1670377923,
+        1670377924,
+        1670377925,
+        1670377868,
+        1670377859,
+        1670377882
+      ],
+      "sales": []
+    },
+    {
+      "id": "spear_aa_t1_normal_002_traitextract",
+      "num": 1729488369,
+      "name": "Extract: Junobote's Smoldering Ranseur",
+      "rarity": 5,
+      "icon": "Image/Icon/Item_128/Equip/Weapon/IT_P_Spear_00021",
+      "quantity": 0,
+      "price": 0,
+      "traits": [
+        1670377923,
+        1670377924,
+        1670377925,
+        1670377866,
+        1670377859,
+        1670377860
+      ],
+      "sales": []
+    },
+    {
+      "id": "spear_aa_t1_normal_003_traitextract",
+      "num": 1729488370,
+      "name": "Extract: Shaikal's Mindveil Harpoon",
+      "rarity": 5,
+      "icon": "Image/Icon/Item_128/Equip/Weapon/IT_P_Spear_00016",
+      "quantity": 0,
+      "price": 0,
+      "traits": [
+        1670377923,
+        1670377924,
+        1670377925,
+        1670377868,
+        1670377860,
+        1670377920
+      ],
+      "sales": []
+    },
+    {
+      "id": "spear_aa_t1_arch_004_traitextract",
+      "num": 1729488371,
+      "name": "Extract: Queen Bellandir's Serrated Spike",
+      "rarity": 5,
+      "icon": "Image/Icon/Item_128/Equip/Weapon/IT_P_Spear_00018",
+      "quantity": 0,
+      "price": 0,
+      "traits": [
+        1670377923,
+        1670377924,
+        1670377925,
+        1670377882,
+        1670377857,
+        1670377897
+      ],
+      "sales": []
+    },
+    {
       "id": "necklace_aa_t1_arena_001_traitextract",
       "num": 1731316452,
       "name": "Extract: Icy Necklace of Strength",
@@ -7532,6 +7857,151 @@
         1670377881,
         1670377887
       ],
+      "sales": []
+    },
+    {
+      "id": "head_leather_aa_t1_set_005_traitextract",
+      "num": 1731378737,
+      "name": "Extract: Gilded Raven Mask",
+      "rarity": 5,
+      "icon": "Image/Icon/Item_128/Equip/Armor/P_Set_LE_M_HM_00012A",
+      "quantity": 0,
+      "price": 0,
+      "traits": [
+        1670377913,
+        1670377914,
+        1670377916,
+        1670377917,
+        1670377860,
+        1670377920
+      ],
+      "sales": []
+    },
+    {
+      "id": "chest_leather_aa_t1_set_005_traitextract",
+      "num": 1731378738,
+      "name": "Extract: Gilded Raven Tunic",
+      "rarity": 5,
+      "icon": "Image/Icon/Item_128/Equip/Armor/P_Part_LE_M_TS_00014A",
+      "quantity": 0,
+      "price": 0,
+      "traits": [
+        1670377913,
+        1670377914,
+        1670377916,
+        1670377917,
+        1670377857,
+        1670377897
+      ],
+      "sales": []
+    },
+    {
+      "id": "hands_leather_aa_t1_set_005_traitextract",
+      "num": 1731378739,
+      "name": "Extract: Gilded Raven Trousers",
+      "rarity": 5,
+      "icon": "Image/Icon/Item_128/Equip/Armor/P_Set_LE_M_GL_00022B",
+      "quantity": 0,
+      "price": 0,
+      "traits": [
+        1670377913,
+        1670377914,
+        1670377916,
+        1670377917,
+        1670377857,
+        1670377919
+      ],
+      "sales": []
+    },
+    {
+      "id": "legs_leather_aa_t1_set_005_traitextract",
+      "num": 1731378740,
+      "name": "Extract: Gilded Raven Grips",
+      "rarity": 5,
+      "icon": "Image/Icon/Item_128/Equip/Armor/P_Set_LE_M_PT_00022B",
+      "quantity": 0,
+      "price": 0,
+      "traits": [
+        1670377913,
+        1670377914,
+        1670377916,
+        1670377917,
+        1670377857,
+        1670377898
+      ],
+      "sales": []
+    },
+    {
+      "id": "feet_leather_aa_t1_set_005_traitextract",
+      "num": 1731378741,
+      "name": "Extract: Gilded Raven Boots",
+      "rarity": 5,
+      "icon": "Image/Icon/Item_128/Equip/Armor/P_Set_LE_M_BT_00022A",
+      "quantity": 0,
+      "price": 0,
+      "traits": [
+        1670377913,
+        1670377914,
+        1670377916,
+        1670377917,
+        1670377860,
+        1670377921
+      ],
+      "sales": []
+    },
+    {
+      "id": "head_leather_aa_t1_set_005_blueprint",
+      "num": 1731378747,
+      "name": "Precious Lithograph: Gilded Raven Mask",
+      "rarity": 5,
+      "icon": "Image/Icon/Item_BluePrint/Equip/Armor/P_Set_LE_M_HM_00012A_Blueprint",
+      "quantity": 0,
+      "price": 0,
+      "traits": [],
+      "sales": []
+    },
+    {
+      "id": "chest_leather_aa_t1_set_005_blueprint",
+      "num": 1731378748,
+      "name": "Precious Lithograph: Gilded Raven Tunic",
+      "rarity": 5,
+      "icon": "Image/Icon/Item_BluePrint/Equip/Armor/P_Part_LE_M_TS_00014A_Blueprint",
+      "quantity": 0,
+      "price": 0,
+      "traits": [],
+      "sales": []
+    },
+    {
+      "id": "hands_leather_aa_t1_set_005_blueprint",
+      "num": 1731378749,
+      "name": "Precious Lithograph: Gilded Raven Trousers",
+      "rarity": 5,
+      "icon": "Image/Icon/Item_BluePrint/Equip/Armor/P_Set_LE_M_GL_00022B_Blueprint",
+      "quantity": 0,
+      "price": 0,
+      "traits": [],
+      "sales": []
+    },
+    {
+      "id": "legs_leather_aa_t1_set_005_blueprint",
+      "num": 1731378750,
+      "name": "Precious Lithograph: Gilded Raven Grips",
+      "rarity": 5,
+      "icon": "Image/Icon/Item_BluePrint/Equip/Armor/P_Set_LE_M_PT_00022B_Blueprint",
+      "quantity": 0,
+      "price": 0,
+      "traits": [],
+      "sales": []
+    },
+    {
+      "id": "feet_leather_aa_t1_set_005_blueprint",
+      "num": 1731378751,
+      "name": "Precious Lithograph: Gilded Raven Boots",
+      "rarity": 5,
+      "icon": "Image/Icon/Item_BluePrint/Equip/Armor/P_Set_LE_M_BT_00022A_Blueprint",
+      "quantity": 0,
+      "price": 0,
+      "traits": [],
       "sales": []
     },
     {
@@ -9961,6 +10431,78 @@
         1670377898,
         1670377890,
         1670377889
+      ],
+      "sales": []
+    },
+    {
+      "id": "spear_a_t1_normal_000",
+      "num": 1729749746,
+      "name": "Halberd of the Resistance",
+      "rarity": 4,
+      "icon": "Image/Icon/Item_128/Equip/Weapon/IT_P_Spear_00005",
+      "quantity": 0,
+      "price": 0,
+      "traits": [
+        1670377923,
+        1670377924,
+        1670377925,
+        1670377866,
+        1670377859,
+        1670377860
+      ],
+      "sales": []
+    },
+    {
+      "id": "spear_a_t1_normal_001",
+      "num": 1729488340,
+      "name": "Razorsteel Pike",
+      "rarity": 4,
+      "icon": "Image/Icon/Item_128/Equip/Weapon/IT_P_Spear_00006",
+      "quantity": 0,
+      "price": 0,
+      "traits": [
+        1670377923,
+        1670377924,
+        1670377925,
+        1670377865,
+        1670377857,
+        1670377858
+      ],
+      "sales": []
+    },
+    {
+      "id": "spear_a_t1_normal_002",
+      "num": 1729488341,
+      "name": "Templar Trident",
+      "rarity": 4,
+      "icon": "Image/Icon/Item_128/Equip/Weapon/IT_P_Spear_00011",
+      "quantity": 0,
+      "price": 0,
+      "traits": [
+        1670377923,
+        1670377924,
+        1670377925,
+        1670377865,
+        1670377857,
+        1670377858
+      ],
+      "sales": []
+    },
+    {
+      "id": "spear_a_t1_normal_003",
+      "num": 1729488342,
+      "name": "Golem Shattering Spear",
+      "rarity": 4,
+      "icon": "Image/Icon/Item_128/Equip/Weapon/IT_P_Spear_00008",
+      "quantity": 0,
+      "price": 0,
+      "traits": [
+        1670377923,
+        1670377924,
+        1670377925,
+        1670377866,
+        1670377859,
+        1670377860
       ],
       "sales": []
     },
@@ -14025,6 +14567,122 @@
       "sales": []
     },
     {
+      "id": "spear_a_t1_normal_000_blueprint",
+      "num": 1729749749,
+      "name": "Rare Lithograph: Halberd of the Resistance",
+      "rarity": 4,
+      "icon": "Image/Icon/Item_BluePrint/Equip/Weapon/IT_P_Spear_00005_blueprint",
+      "quantity": 0,
+      "price": 0,
+      "traits": [],
+      "sales": []
+    },
+    {
+      "id": "spear_a_t1_normal_001_blueprint",
+      "num": 1729488352,
+      "name": "Rare Lithograph: Razorsteel Pike",
+      "rarity": 4,
+      "icon": "Image/Icon/Item_BluePrint/Equip/Weapon/IT_P_Spear_00006_blueprint",
+      "quantity": 0,
+      "price": 0,
+      "traits": [],
+      "sales": []
+    },
+    {
+      "id": "spear_a_t1_normal_002_blueprint",
+      "num": 1729488353,
+      "name": "Rare Lithograph: Templar Trident",
+      "rarity": 4,
+      "icon": "Image/Icon/Item_BluePrint/Equip/Weapon/IT_P_Spear_00011_blueprint",
+      "quantity": 0,
+      "price": 0,
+      "traits": [],
+      "sales": []
+    },
+    {
+      "id": "spear_a_t1_normal_003_blueprint",
+      "num": 1729488354,
+      "name": "Rare Lithograph: Golem Shattering Spear",
+      "rarity": 4,
+      "icon": "Image/Icon/Item_BluePrint/Equip/Weapon/IT_P_Spear_00008_blueprint",
+      "quantity": 0,
+      "price": 0,
+      "traits": [],
+      "sales": []
+    },
+    {
+      "id": "spear_a_t1_normal_000_traitextract",
+      "num": 1729749752,
+      "name": "Extract: Halberd of the Resistance",
+      "rarity": 4,
+      "icon": "Image/Icon/Item_128/Equip/Weapon/IT_P_Spear_00005",
+      "quantity": 0,
+      "price": 0,
+      "traits": [
+        1670377923,
+        1670377924,
+        1670377925,
+        1670377866,
+        1670377859,
+        1670377860
+      ],
+      "sales": []
+    },
+    {
+      "id": "spear_a_t1_normal_001_traitextract",
+      "num": 1729488365,
+      "name": "Extract: Razorsteel Pike",
+      "rarity": 4,
+      "icon": "Image/Icon/Item_128/Equip/Weapon/IT_P_Spear_00006",
+      "quantity": 0,
+      "price": 0,
+      "traits": [
+        1670377923,
+        1670377924,
+        1670377925,
+        1670377865,
+        1670377857,
+        1670377858
+      ],
+      "sales": []
+    },
+    {
+      "id": "spear_a_t1_normal_002_traitextract",
+      "num": 1729488366,
+      "name": "Extract: Templar Trident",
+      "rarity": 4,
+      "icon": "Image/Icon/Item_128/Equip/Weapon/IT_P_Spear_00011",
+      "quantity": 0,
+      "price": 0,
+      "traits": [
+        1670377923,
+        1670377924,
+        1670377925,
+        1670377865,
+        1670377857,
+        1670377858
+      ],
+      "sales": []
+    },
+    {
+      "id": "spear_a_t1_normal_003_traitextract",
+      "num": 1729488367,
+      "name": "Extract: Golem Shattering Spear",
+      "rarity": 4,
+      "icon": "Image/Icon/Item_128/Equip/Weapon/IT_P_Spear_00008",
+      "quantity": 0,
+      "price": 0,
+      "traits": [
+        1670377923,
+        1670377924,
+        1670377925,
+        1670377866,
+        1670377859,
+        1670377860
+      ],
+      "sales": []
+    },
+    {
       "id": "usable_food_result_005_ka",
       "num": 1718977921,
       "name": "Rare Fish Steak",
@@ -16288,6 +16946,24 @@
       "sales": []
     },
     {
+      "id": "spear_b_t1_normal_001",
+      "num": 1729488339,
+      "name": "Combat Halberd",
+      "rarity": 3,
+      "icon": "Image/Icon/Item_128/Equip/Weapon/IT_P_Spear_00001",
+      "quantity": 0,
+      "price": 0,
+      "traits": [
+        1670377923,
+        1670377924,
+        1670377925,
+        1670377868,
+        1670377857,
+        1670377858
+      ],
+      "sales": []
+    },
+    {
       "id": "material_jewel_sapphire_02",
       "num": 1665561531,
       "name": "Quality Marind",
@@ -18276,6 +18952,24 @@
       "sales": []
     },
     {
+      "id": "spear_b_t1_normal_001_traitextract",
+      "num": 1729488364,
+      "name": "Extract: Combat Halberd",
+      "rarity": 3,
+      "icon": "Image/Icon/Item_128/Equip/Weapon/IT_P_Spear_00001",
+      "quantity": 0,
+      "price": 0,
+      "traits": [
+        1670377923,
+        1670377924,
+        1670377925,
+        1670377868,
+        1670377857,
+        1670377858
+      ],
+      "sales": []
+    },
+    {
       "id": "usable_food_result_001_kb",
       "num": 1718977871,
       "name": "Quality Roasted Honey Apple",
@@ -19618,6 +20312,28 @@
       "sales": []
     },
     {
+      "id": "spear_c_t1_normal_001",
+      "num": 1729488337,
+      "name": "Sparring Longspear",
+      "rarity": 2,
+      "icon": "Image/Icon/Item_128/Equip/Weapon/IT_P_Spear_00002",
+      "quantity": 0,
+      "price": 0,
+      "traits": [],
+      "sales": []
+    },
+    {
+      "id": "spear_c_t1_normal_002",
+      "num": 1729488338,
+      "name": "Iron Halberd",
+      "rarity": 2,
+      "icon": "Image/Icon/Item_128/Equip/Weapon/IT_P_Spear_00003",
+      "quantity": 0,
+      "price": 0,
+      "traits": [],
+      "sales": []
+    },
+    {
       "id": "material_jewel_emerald",
       "num": 14000053,
       "name": "Emeret",
@@ -20021,22 +20737,22 @@
       "name": "PvP Magic Heavy Attack Chance"
     },
     "1670377830": {
-      "name": "PvP Melee Evasion "
+      "name": "PvP Melee Evasion"
     },
     "1670377831": {
-      "name": "PvP Ranged Evasion "
+      "name": "PvP Ranged Evasion"
     },
     "1670377832": {
-      "name": "PvP Magic Evasion "
+      "name": "PvP Magic Evasion"
     },
     "1670377833": {
-      "name": "PvP Melee Endurance "
+      "name": "PvP Melee Endurance"
     },
     "1670377834": {
-      "name": "PvP Ranged Endurance "
+      "name": "PvP Ranged Endurance"
     },
     "1670377835": {
-      "name": "PvP Magic Endurance "
+      "name": "PvP Magic Endurance"
     },
     "1670377836": {
       "name": "PvP Melee Heavy Attack Evasion"
@@ -20138,7 +20854,7 @@
       "name": "Undead Damage Reduction"
     },
     "1670377876": {
-      "name": "Construct Damage Reduction "
+      "name": "Construct Damage Reduction"
     },
     "1670377878": {
       "name": "Wildkin Damage Reduction"
@@ -20159,7 +20875,7 @@
       "name": "Silence Chance"
     },
     "1670377886": {
-      "name": "Terror Chance"
+      "name": "Fear Chance"
     },
     "1670377887": {
       "name": "Bind Chance"
@@ -20180,7 +20896,7 @@
       "name": "Silence Resistance"
     },
     "1670377893": {
-      "name": "Terror Resistance"
+      "name": "Fear Resistance"
     },
     "1670377894": {
       "name": "Bind Resistance"
@@ -20216,7 +20932,7 @@
       "name": "Ranged Hit Chance"
     },
     "1670377905": {
-      "name": "Ranged Critical Hit Chance "
+      "name": "Ranged Critical Hit Chance"
     },
     "1670377906": {
       "name": "Ranged Heavy Attack Chance"
@@ -20225,7 +20941,7 @@
       "name": "Magic Hit Chance"
     },
     "1670377908": {
-      "name": "Magic Critical Hit Chance "
+      "name": "Magic Critical Hit Chance"
     },
     "1670377909": {
       "name": "Magic Heavy Attack Chance"
